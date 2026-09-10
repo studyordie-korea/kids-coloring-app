@@ -2,41 +2,28 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>만 5세 어린이 색칠공부</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 아이 쏙쏙 색칠놀이</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="app-container">
-        <h1>우리 아이 색칠공부 놀이</h1>
+        <h1>🎨 쏙쏙 색칠놀이</h1>
         
-        <!-- 색칠 영역 -->
+        <!-- 색칠공부 캔버스 -->
         <canvas id="coloringCanvas"></canvas>
 
-        <!-- 도구 및 팔레트 UI 영역 -->
         <div id="ui-container">
-            <!-- 2번 요건: 3가지 색칠 도구 -->
+            <!-- 도구 선택 버튼 영역 -->
             <div id="tools">
                 <button class="tool-btn active" data-tool="pen">사인펜</button>
                 <button class="tool-btn" data-tool="colored-pencil">색연필</button>
                 <button class="tool-btn" data-tool="bucket">페인트 버킷</button>
             </div>
 
-            <!-- 3번 요건: 대표 색상 팔레트 (추후 64컬러로 확장 가능) -->
-<div id="palette-container">
+            <!-- 32컬러 팔레트 영역 -->
+            <div id="palette-container">
                 <div id="palette"></div>
-            </div>
-                <!-- 아이들이 좋아하는 선명한 기본 색상들 -->
-                <div class="color-chip" style="background-color: #FF0000;" data-color="#FF0000"></div>
-                <div class="color-chip" style="background-color: #FF7F00;" data-color="#FF7F00"></div>
-                <div class="color-chip" style="background-color: #FFFF00;" data-color="#FFFF00"></div>
-                <div class="color-chip" style="background-color: #00FF00;" data-color="#00FF00"></div>
-                <div class="color-chip" style="background-color: #0000FF;" data-color="#0000FF"></div>
-                <div class="color-chip" style="background-color: #4B0082;" data-color="#4B0082"></div>
-                <div class="color-chip" style="background-color: #8B00FF;" data-color="#8B00FF"></div>
-                <div class="color-chip" style="background-color: #FF1493;" data-color="#FF1493"></div>
-                <div class="color-chip" style="background-color: #FFFFFF; border: 1px solid #ccc;" data-color="#FFFFFF"></div>
-                <div class="color-chip" style="background-color: #000000;" data-color="#000000"></div>
             </div>
         </div>
     </div>
