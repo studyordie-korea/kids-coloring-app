@@ -5,7 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.width = 600;
     canvas.height = 450;
 
-    // 밑그림 이미지 로드
+    // 밑그림 이미지 로드 (CORS 문제 방지를 위해 crossOrigin 속성 명시)
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg";
@@ -18,16 +18,12 @@ window.addEventListener('DOMContentLoaded', () => {
     let currentColor = "#FF0000";
     let currentTool = "pen";
 
-    // --- 1. 64 컬러 팔레트 동적 생성 ---
+    // 1. 64 컬러 팔레트 동적 생성
     const paletteEl = document.getElementById('palette');
-    
-    // 64가지 색상을 다채롭게 생성하는 로직
     const colors = [];
-    // 무채색 및 기본 대표 색상
     const baseColors = ["#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF"];
     colors.push(...baseColors);
 
-    // 64개가 되도록 색상 조합 만들기 (Hue 회전 방식)
     for (let i = 0; i < 52; i++) {
         const hue = (i * 360) / 52;
         colors.push(`hsl(${hue}, 80%, 60%)`);
@@ -47,7 +43,7 @@ window.addEventListener('DOMContentLoaded', () => {
         paletteEl.appendChild(chip);
     });
 
-    // --- 2. 도구 선택 ---
+    // 2. 도구 선택
     const toolButtons = document.querySelectorAll('.tool-btn');
     toolButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -57,7 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 3. 좌표 계산 ---
+    // 3. 좌표 계산
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -68,7 +64,7 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 4. 캔버스 이벤트 핸들러 ---
+    // 4. 이벤트 핸들러
     canvas.addEventListener('mousedown', handleActionStart);
     canvas.addEventListener('touchstart', (e) => { handleActionStart(e); e.preventDefault(); });
 
@@ -76,10 +72,13 @@ window.addEventListener('DOMContentLoaded', () => {
         const pos = getPosition(e);
 
         if (currentTool === 'bucket') {
-            // 페인트 버킷 (플러드 필 실행)
-            floodFill(pos.x, pos.y, currentColor);
+            try {
+                floodFill(pos.x, pos.y, currentColor);
+            } catch (err) {
+                console.error("페인트 버킷 실행 중 오류 발생 (CORS 보안 제한 등):", err);
+                alert("이미지 보안 정책으로 인해 버킷을 채울 수 없습니다. 선을 직접 그려서 테스트해 보세요!");
+            }
         } else {
-            // 사인펜 또는 색연필 그리기 시작
             isDrawing = true;
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
@@ -112,26 +111,25 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
-    // --- 5. 페인트 버킷 알고리즘 (Flood Fill) ---
+    // 5. 색상 변환 유틸리티
     function hexToRgba(hex) {
-        let c;
-        if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-            c = hex.substring(1).split('');
-            if(c.length === 3){ c = [c[0], c[0], c[1], c[1], c[2], c[2]]; }
-            c = '0x' + c.join('');
-            return [(c>>16)&255, (c>>8)&255, c&255, 255];
+        if (hex.startsWith('#')) {
+            let c = hex.substring(1);
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return [(num >> 16) & 255, (num >> 8) & 255, num & 255, 255];
         }
-        // HSL 색상 지원을 위한 파싱 보완
         const tempDiv = document.createElement('div');
         tempDiv.style.color = hex;
         document.body.appendChild(tempDiv);
         const rgb = window.getComputedStyle(tempDiv).color;
         document.body.removeChild(tempDiv);
         const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-        if(match) return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), 255];
+        if (match) return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), 255];
         return [255, 0, 0, 255];
     }
 
+    // 6. 페인트 버킷 (개선된 Flood Fill 알고리즘)
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
@@ -142,15 +140,12 @@ window.addEventListener('DOMContentLoaded', () => {
         const startR = data[startIndex];
         const startG = data[startIndex + 1];
         const startB = data[startIndex + 2];
-        const startA = data[startIndex + 3];
 
         const [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
 
-        // 이미 같은 색이면 중단
-        if (startR === fillR && startG === fillG && startB === fillB && startA === fillA) return;
-
-        // 검은색 외곽선(어두운 선) 영역은 침범하지 않도록 예외 처리
-        if (startR < 50 && startG < 50 && startB < 50) return;
+        // 검은색 외곽선(어두운 선)을 클릭한 경우는 채우지 않음
+        if (startR < 80 && startG < 80 && startB < 80) return;
+        if (startR === fillR && startG === fillG && startB === fillB) return;
 
         const queue = [[startX, startY]];
         const visited = new Uint8Array(width * height);
@@ -167,15 +162,14 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            // 경계선(어두운 선)을 만나면 멈춤
-            if (r < 50 && g < 50 && b < 50) continue;
+            // 경계선(어두운 색)을 만나면 멈춤
+            if (r < 80 && g < 80 && b < 80) continue;
 
-            // 시작 색상과 비슷한 영역인지 확인
-            if (Math.abs(r - startR) > 30 || Math.abs(g - startG) > 30 || Math.abs(b - startB) > 30) continue;
+            // 배경 색상 허용 오차 범위 조정 (색이 부드럽게 퍼지도록)
+            if (Math.abs(r - startR) > 50 || Math.abs(g - startG) > 50 || Math.abs(b - startB) > 50) continue;
 
             visited[idx] = 1;
 
-            // 색상 채우기
             data[pixelPos] = fillR;
             data[pixelPos + 1] = fillG;
             data[pixelPos + 2] = fillB;
