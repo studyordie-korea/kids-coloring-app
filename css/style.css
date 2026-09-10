@@ -7,18 +7,80 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 #app-container {
     text-align: center;
+    max-width: 950px;
+    margin: 10px auto;
 }
 
 h1 {
     color: #FF6B6B;
-    font-size: 22px;
+    font-size: 24px;
     margin-bottom: 10px;
+}
+
+#main-layout {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+/* 밑그림 선택 사이드바 (30종) */
+#template-sidebar {
+    width: 200px;
+    height: 480px;
+    background: white;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+#template-sidebar h3 {
+    font-size: 14px;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+#template-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding-right: 4px;
+}
+
+.template-thumb {
+    width: 100%;
+    height: 70px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    object-fit: cover;
+    background-color: #f9f9f9;
+    transition: transform 0.1s;
+}
+
+.template-thumb:hover {
+    transform: scale(1.05);
+}
+
+.template-thumb.selected {
+    border: 3px solid #FF6B6B;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+#canvas-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* 도구별 커서 스타일이 적용되는 캔버스 */
@@ -30,7 +92,6 @@ canvas {
     touch-action: none;
 }
 
-/* 도구별 마우스 커서 지정 */
 canvas.tool-pen {
     cursor: crosshair;
 }
@@ -44,11 +105,12 @@ canvas.tool-bucket {
 }
 
 #ui-container {
-    margin-top: 15px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
+    width: 600px;
 }
 
 #tools {
@@ -57,14 +119,14 @@ canvas.tool-bucket {
 }
 
 .tool-btn {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 18px;
+    font-size: 15px;
     font-weight: bold;
     border: none;
     border-radius: 20px;
     background-color: #E0E0E0;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .tool-btn.active {
@@ -72,8 +134,34 @@ canvas.tool-bucket {
     color: white;
 }
 
+/* 질감 선택기 */
+#texture-selector {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 2px;
+}
+
+.tex-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.tex-btn.active {
+    background-color: #4D96FF;
+    color: white;
+    border-color: #4D96FF;
+}
+
 /* 32컬러 팔레트 스타일 (16열 2줄) */
-#palette-container {
+#palette-control-container {
     width: 600px;
     background: white;
     padding: 8px;
@@ -83,8 +171,8 @@ canvas.tool-bucket {
 
 #palette {
     display: grid;
-    grid-template-columns: repeat(16, 1fr); /* 16열씩 2줄 = 32컬러 */
-    gap: 6px;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 5px;
 }
 
 .color-chip {
