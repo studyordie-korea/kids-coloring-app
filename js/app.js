@@ -5,19 +5,79 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.width = 600;
     canvas.height = 450;
 
-    // 밑그림 이미지 로드 및 배경 흰색 초기화 처리
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg";
-    
-    img.onload = () => {
-        // 1. 먼저 캔버스 전체를 완벽한 흰색으로 깨끗하게 채웁니다.
+    // --- 1. 코드로 직접 귀여운 고양이 밑그림 그리기 (CORS 및 노이즈 문제 원천 해결) ---
+    function drawTemplate() {
+        // 배경을 완벽한 흰색으로 채우기
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 2. 그 위에 밑그림(외곽선)을 그립니다.
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
+
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // 얼굴 윤곽 (동글동글한 고양이 얼굴)
+        ctx.beginPath();
+        ctx.arc(300, 240, 150, 0, Math.PI * 2);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fill();
+        ctx.stroke();
+
+        // 왼쪽 귀
+        ctx.beginPath();
+        ctx.moveTo(180, 140);
+        ctx.lineTo(150, 40);
+        ctx.lineTo(250, 100);
+        ctx.closePath();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fill();
+        ctx.stroke();
+
+        // 오른쪽 귀
+        ctx.beginPath();
+        ctx.moveTo(420, 140);
+        ctx.lineTo(450, 40);
+        ctx.lineTo(350, 100);
+        ctx.closePath();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fill();
+        ctx.stroke();
+
+        // 왼쪽 눈 (동그라미)
+        ctx.beginPath();
+        ctx.arc(240, 200, 20, 0, Math.PI * 2);
+        ctx.fillStyle = "#000000";
+        ctx.fill();
+
+        // 오른쪽 눈 (동그라미)
+        ctx.beginPath();
+        ctx.arc(360, 200, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 코
+        ctx.beginPath();
+        ctx.moveTo(290, 240);
+        ctx.lineTo(310, 240);
+        ctx.lineTo(300, 255);
+        ctx.closePath();
+        ctx.fill();
+
+        // 입 (웃는 모양)
+        ctx.beginPath();
+        ctx.moveTo(300, 255);
+        ctx.lineTo(300, 275);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(275, 275, 25, 0, Math.PI);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(325, 275, 25, 0, Math.PI);
+        ctx.stroke();
+    }
+
+    drawTemplate();
 
     let isDrawing = false;
     let currentColor = "#FF0000";
@@ -25,7 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     canvas.className = "tool-pen";
 
-    // --- 1. 32 컬러 팔레트 동적 생성 ---
+    // --- 2. 32 컬러 팔레트 동적 생성 ---
     const paletteEl = document.getElementById('palette');
     const colors = [
         "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", 
@@ -48,7 +108,7 @@ window.addEventListener('DOMContentLoaded', () => {
         paletteEl.appendChild(chip);
     });
 
-    // --- 2. 도구 선택 및 커서 변경 ---
+    // --- 3. 도구 선택 및 커서 변경 ---
     const toolButtons = document.querySelectorAll('.tool-btn');
     toolButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -67,7 +127,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 3. 좌표 계산 ---
+    // --- 4. 좌표 계산 ---
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -78,7 +138,7 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 4. 이벤트 핸들러 ---
+    // --- 5. 이벤트 핸들러 ---
     canvas.addEventListener('mousedown', handleActionStart);
     canvas.addEventListener('touchstart', (e) => { handleActionStart(e); e.preventDefault(); });
 
@@ -124,7 +184,7 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
-    // --- 5. 색상 변환 유틸리티 ---
+    // --- 6. 색상 변환 유틸리티 ---
     function hexToRgba(hex) {
         if (hex.startsWith('#')) {
             let c = hex.substring(1);
@@ -142,7 +202,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 6. 페인트 버킷 알고리즘 (Flood Fill) ---
+    // --- 7. 완벽한 페인트 버킷 (Flood Fill) 알고리즘 ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
@@ -158,10 +218,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
 
-        // 1. 검은색/어두운 외곽선(임계값 90 미만)을 클릭한 경우 채우지 않음
-        if (startR < 90 && startG < 90 && startB < 90) return;
+        // 검은색 외곽선(어두운 선)을 클릭한 경우는 채우지 않음
+        if (startR < 50 && startG < 50 && startB < 50) return;
 
-        // 2. 이미 채우려는 색과 완전히 같은 경우 중단
+        // 이미 채우려는 색과 완전히 같은 경우 중단
         if (startR === fillR && startG === fillG && startB === fillB) return;
 
         const queue = [[startX, startY]];
@@ -179,11 +239,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            // 3. 검은색 외곽선(어두운 선)을 만나면 채우기를 멈춤
-            if (r < 90 && g < 90 && b < 90) continue;
+            // 검은색 외곽선(어두운 선)을 만나면 막힘
+            if (r < 50 && g < 50 && b < 50) continue;
 
-            // 4. 클릭한 지점의 색상과 유사한 영역을 채움 (배경이 흰색으로 통일되어 정상 작동)
-            if (Math.abs(r - startR) > 40 || Math.abs(g - startG) > 40 || Math.abs(b - startB) > 40) continue;
+            // 클릭한 지점의 색상 영역과 일치하는 픽셀만 채우기 확장
+            if (Math.abs(r - startR) > 30 || Math.abs(g - startG) > 30 || Math.abs(b - startB) > 30) continue;
 
             visited[idx] = 1;
 
