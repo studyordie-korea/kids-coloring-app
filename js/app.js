@@ -3,89 +3,80 @@ window.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     canvas.width = 600;
-    canvas.height = 450;
+    canvas.height = 430;
 
-    // --- 1. 코드로 직접 귀여운 고양이 밑그림 그리기 (CORS 및 노이즈 문제 원천 해결) ---
-    function drawTemplate() {
-        // 배경을 완벽한 흰색으로 채우기
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // --- 30종 밑그림 이미지 목록 ---
+    const templates = [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Felis_catus-cat_on_snow.jpg/600px-Felis_catus-cat_on_snow.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/600px-Cat_November_2010-1a.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Magpie_rodents_dead.jpg/600px-Magpie_rodents_dead.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Ash_falls_on_cars_in_Manila.jpg/600px-Ash_falls_on_cars_in_Manila.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Black_cat_on_a_white_background.jpg/600px-Black_cat_on_a_white_background.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Dog_Breeds.jpg/600px-Dog_Breeds.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Siberian_husky_kochi.jpg/600px-Siberian_husky_kochi.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Labrador_Retriever_portrait.jpg/600px-Labrador_Retriever_portrait.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Golden_Retriever_In_Water.jpg/600px-Golden_Retriever_In_Water.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_kitten_gnawing_on_a_pen.jpg/600px-A_kitten_gnawing_on_a_pen.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Cute_dog.jpg/600px-Cute_dog.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Gemsbok_at_Etosha.jpg/600px-Gemsbok_at_Etosha.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-wj_step.jpg/600px-Eq_it-wj_step.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Panda_Cub_playing_-_Flickr_-_Ron_Knight.jpg/600px-Panda_Cub_playing_-_Flickr_-_Ron_Knight.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Red_Panda_%28Ailurus_fulgens%29_-_video_frame.png/600px-Red_Panda_%28Ailurus_fulgens%29_-_video_frame.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/European_robin_Galicia.jpg/600px-European_robin_Galicia.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Oryctolagus_cuniculus_Rc.jpg/600px-Oryctolagus_cuniculus_Rc.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Fox_-_National_Zoo_%28Washington%2C_D.C.%29.jpg/600px-Fox_-_National_Zoo_%28Washington%2C_D.C.%29.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Male_and_female_mallard_ducks.jpg/600px-Male_and_female_mallard_ducks.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Panthera_leo_and_cub_%28Lion%29.jpg/600px-Panthera_leo_and_cub_%28Lion%29.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/African_Bush_Elephant.jpg/600px-African_Bush_Elephant.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Giraffe_standing.jpg/600px-Giraffe_standing.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Macaw_sharp.jpg/600px-Macaw_sharp.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Hedgehog_%28cropped%29.jpg/600px-Hedgehog_%28cropped%29.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Koala_climbing_a_tree.jpg/600px-Koala_climbing_a_tree.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Bottlenose_dolphin_-_Kaikoura.jpg/600px-Bottlenose_dolphin_-_Kaikoura.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Penguin_group_St_Kilda.jpg/600px-Penguin_group_St_Kilda.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Honey_bee_on_dandelion.jpg/600px-Honey_bee_on_dandelion.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Moraine_Lake_17092005.jpg/600px-Moraine_Lake_17092005.jpg"
+    ];
 
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 5;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
+    let currentImg = new Image();
+    currentImg.crossOrigin = "anonymous";
 
-        // 얼굴 윤곽 (동글동글한 고양이 얼굴)
-        ctx.beginPath();
-        ctx.arc(300, 240, 150, 0, Math.PI * 2);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fill();
-        ctx.stroke();
-
-        // 왼쪽 귀
-        ctx.beginPath();
-        ctx.moveTo(180, 140);
-        ctx.lineTo(150, 40);
-        ctx.lineTo(250, 100);
-        ctx.closePath();
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fill();
-        ctx.stroke();
-
-        // 오른쪽 귀
-        ctx.beginPath();
-        ctx.moveTo(420, 140);
-        ctx.lineTo(450, 40);
-        ctx.lineTo(350, 100);
-        ctx.closePath();
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fill();
-        ctx.stroke();
-
-        // 왼쪽 눈 (동그라미)
-        ctx.beginPath();
-        ctx.arc(240, 200, 20, 0, Math.PI * 2);
-        ctx.fillStyle = "#000000";
-        ctx.fill();
-
-        // 오른쪽 눈 (동그라미)
-        ctx.beginPath();
-        ctx.arc(360, 200, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 코
-        ctx.beginPath();
-        ctx.moveTo(290, 240);
-        ctx.lineTo(310, 240);
-        ctx.lineTo(300, 255);
-        ctx.closePath();
-        ctx.fill();
-
-        // 입 (웃는 모양)
-        ctx.beginPath();
-        ctx.moveTo(300, 255);
-        ctx.lineTo(300, 275);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(275, 275, 25, 0, Math.PI);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(325, 275, 25, 0, Math.PI);
-        ctx.stroke();
+    function loadTemplate(url) {
+        currentImg.src = url;
+        currentImg.onload = () => {
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
+        };
     }
 
-    drawTemplate();
+    // 30종 밑그림 썸네일 UI 생성
+    const templateGrid = document.getElementById('template-grid');
+    templates.forEach((url, index) => {
+        const thumb = document.createElement('img');
+        thumb.className = 'template-thumb' + (index === 0 ? ' selected' : '');
+        thumb.src = url;
+        thumb.alt = `밑그림 ${index + 1}`;
+        thumb.addEventListener('click', (e) => {
+            document.querySelectorAll('.template-thumb').forEach(t => t.classList.remove('selected'));
+            e.target.classList.add('selected');
+            loadTemplate(url);
+        });
+        templateGrid.appendChild(thumb);
+    });
+
+    // 최초 첫 번째 그림 로드
+    loadTemplate(templates[0]);
 
     let isDrawing = false;
     let currentColor = "#FF0000";
     let currentTool = "pen";
+    let currentTexture = "solid";
 
     canvas.className = "tool-pen";
 
-    // --- 2. 32 컬러 팔레트 동적 생성 ---
+    // --- 1. 32 컬러 팔레트 동적 생성 ---
     const paletteEl = document.getElementById('palette');
     const colors = [
         "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", 
@@ -108,7 +99,17 @@ window.addEventListener('DOMContentLoaded', () => {
         paletteEl.appendChild(chip);
     });
 
-    // --- 3. 도구 선택 및 커서 변경 ---
+    // --- 질감 선택 핸들러 ---
+    const texButtons = document.querySelectorAll('.tex-btn');
+    texButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            texButtons.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentTexture = e.target.getAttribute('data-texture');
+        });
+    });
+
+    // --- 2. 도구 선택 및 커서 변경 ---
     const toolButtons = document.querySelectorAll('.tool-btn');
     toolButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -127,7 +128,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 4. 좌표 계산 ---
+    // --- 3. 좌표 계산 ---
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -138,7 +139,7 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 5. 이벤트 핸들러 ---
+    // --- 4. 이벤트 핸들러 ---
     canvas.addEventListener('mousedown', handleActionStart);
     canvas.addEventListener('touchstart', (e) => { handleActionStart(e); e.preventDefault(); });
 
@@ -178,13 +179,32 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.strokeStyle = currentColor;
         ctx.lineWidth = currentTool === 'colored-pencil' ? 3 : 8;
         ctx.lineCap = 'round';
-        ctx.globalAlpha = currentTool === 'colored-pencil' ? 0.6 : 1.0;
+
+        // 질감별 스타일 적용
+        if (currentTexture === 'watercolor') {
+            ctx.globalAlpha = 0.4;
+            ctx.lineWidth = currentTool === 'colored-pencil' ? 5 : 12;
+        } else if (currentTexture === 'crayon') {
+            ctx.globalAlpha = 0.85;
+            ctx.lineWidth = currentTool === 'colored-pencil' ? 4 : 10;
+        } else if (currentTexture === 'glitter') {
+            ctx.globalAlpha = 0.9;
+            ctx.lineWidth = currentTool === 'colored-pencil' ? 3 : 6;
+        } else {
+            ctx.globalAlpha = currentTool === 'colored-pencil' ? 0.6 : 1.0;
+        }
 
         ctx.lineTo(x, y);
         ctx.stroke();
+
+        // 반짝이 질감 효과
+        if (currentTexture === 'glitter' && Math.random() < 0.4) {
+            ctx.fillStyle = currentColor;
+            ctx.fillRect(x + (Math.random() * 6 - 3), y + (Math.random() * 6 - 3), 3, 3);
+        }
     }
 
-    // --- 6. 색상 변환 유틸리티 ---
+    // --- 5. 색상 변환 유틸리티 ---
     function hexToRgba(hex) {
         if (hex.startsWith('#')) {
             let c = hex.substring(1);
@@ -202,7 +222,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 7. 완벽한 페인트 버킷 (Flood Fill) 알고리즘 ---
+    // --- 6. 페인트 버킷 알고리즘 (질감 적용 포함) ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
@@ -216,12 +236,13 @@ window.addEventListener('DOMContentLoaded', () => {
         const startG = data[startIndex + 1];
         const startB = data[startIndex + 2];
 
-        const [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
+        let [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
 
-        // 검은색 외곽선(어두운 선)을 클릭한 경우는 채우지 않음
-        if (startR < 50 && startG < 50 && startB < 50) return;
+        if (currentTexture === 'watercolor') {
+            fillA = Math.floor(fillA * 0.55);
+        }
 
-        // 이미 채우려는 색과 완전히 같은 경우 중단
+        if (startR < 90 && startG < 90 && startB < 90) return;
         if (startR === fillR && startG === fillG && startB === fillB) return;
 
         const queue = [[startX, startY]];
@@ -239,18 +260,25 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            // 검은색 외곽선(어두운 선)을 만나면 막힘
-            if (r < 50 && g < 50 && b < 50) continue;
-
-            // 클릭한 지점의 색상 영역과 일치하는 픽셀만 채우기 확장
-            if (Math.abs(r - startR) > 30 || Math.abs(g - startG) > 30 || Math.abs(b - startB) > 30) continue;
+            if (r < 90 && g < 90 && b < 90) continue;
+            if (Math.abs(r - startR) > 40 || Math.abs(g - startG) > 40 || Math.abs(b - startB) > 40) continue;
 
             visited[idx] = 1;
 
-            data[pixelPos] = fillR;
-            data[pixelPos + 1] = fillG;
-            data[pixelPos + 2] = fillB;
-            data[pixelPos + 3] = fillA;
+            if (currentTexture === 'watercolor') {
+                data[pixelPos]     = Math.floor((r * (255 - fillA) + fillR * fillA) / 255);
+                data[pixelPos + 1] = Math.floor((g * (255 - fillA) + fillG * fillA) / 255);
+                data[pixelPos + 2] = Math.floor((b * (255 - fillA) + fillB * fillA) / 255);
+            } else if (currentTexture === 'glitter' && Math.random() < 0.15) {
+                data[pixelPos]     = Math.min(255, fillR + 80);
+                data[pixelPos + 1] = Math.min(255, fillG + 80);
+                data[pixelPos + 2] = Math.min(255, fillB + 80);
+            } else {
+                data[pixelPos]     = fillR;
+                data[pixelPos + 1] = fillG;
+                data[pixelPos + 2] = fillB;
+                data[pixelPos + 3] = fillA;
+            }
 
             queue.push([x + 1, y]);
             queue.push([x - 1, y]);
