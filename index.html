@@ -10,39 +10,34 @@
     <div id="app-container">
         <h1>🎨 쏙쏙 색칠놀이</h1>
         
-        <div id="main-layout">
-            <!-- 좌측: 밑그림 선택 (30종) -->
-            <div id="template-sidebar">
-                <h3>밑그림 선택 (30종)</h3>
-                <div id="template-grid"></div>
+        <!-- 밑그림 선택 30종 캐러셀/그리드 바 -->
+        <div id="template-container">
+            <div id="template-list"></div>
+        </div>
+        
+        <!-- 색칠공부 캔버스 -->
+        <canvas id="coloringCanvas"></canvas>
+
+        <div id="ui-container">
+            <!-- 도구 선택 버튼 영역 -->
+            <div id="tools">
+                <button class="tool-btn active" data-tool="pen">사인펜</button>
+                <button class="tool-btn" data-tool="colored-pencil">색연필</button>
+                <button class="tool-btn" data-tool="bucket">페인트 버킷</button>
             </div>
 
-            <!-- 중앙: 캔버스 및 도구 -->
-            <div id="canvas-area">
-                <canvas id="coloringCanvas"></canvas>
+            <!-- 페인트 버킷 전용 배경 패턴(질감) 선택 영역 -->
+            <div id="pattern-selector">
+                <span style="font-weight:bold; font-size:14px; color:#555;">버킷 패턴:</span>
+                <button class="pattern-btn active" data-pattern="solid">단색</button>
+                <button class="pattern-btn" data-pattern="stripe">줄무늬</button>
+                <button class="pattern-btn" data-pattern="dot">도트</button>
+                <button class="pattern-btn" data-pattern="grid">격자</button>
+            </div>
 
-                <div id="ui-container">
-                    <!-- 도구 선택 버튼 영역 -->
-                    <div id="tools">
-                        <button class="tool-btn active" data-tool="pen">사인펜</button>
-                        <button class="tool-btn" data-tool="colored-pencil">색연필</button>
-                        <button class="tool-btn" data-tool="bucket">페인트 버킷</button>
-                    </div>
-
-                    <!-- 32컬러 팔레트 및 질감 선택 영역 -->
-                    <div id="palette-control-container">
-                        <div id="texture-selector">
-                            <label>질감 선택: </label>
-                            <button class="tex-btn active" data-texture="solid">기본</button>
-                            <button class="tex-btn" data-texture="watercolor">수채화</button>
-                            <button class="tex-btn" data-texture="crayon">크레파스</button>
-                            <button class="tex-btn" data-texture="glitter">반짝이</button>
-                        </div>
-                        <div id="palette-container">
-                            <div id="palette"></div>
-                        </div>
-                    </div>
-                </div>
+            <!-- 32컬러 팔레트 영역 -->
+            <div id="palette-container">
+                <div id="palette"></div>
             </div>
         </div>
     </div>
