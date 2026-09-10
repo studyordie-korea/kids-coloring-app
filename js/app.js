@@ -18,18 +18,21 @@ window.addEventListener('DOMContentLoaded', () => {
     let currentColor = "#FF0000";
     let currentTool = "pen";
 
-    // 1. 64 컬러 팔레트 동적 생성
+    // 초기 커서 클래스 설정
+    canvas.className = "tool-pen";
+
+    // --- 1. 32 컬러 팔레트 동적 생성 ---
     const paletteEl = document.getElementById('palette');
-    const colors = [];
-    const baseColors = ["#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF"];
-    colors.push(...baseColors);
+    const colors = [
+        // 기본 무채색 및 대표 선명한 색상 (16개)
+        "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", 
+        "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#FF1493", "#8B4513", "#FFC0CB",
+        // 아이들이 쓰기 좋은 화사한 파스텔 및 중간 계열 색상 (16개)
+        "#FF9999", "#FFCC99", "#FFFF99", "#99FF99", "#99FFFF", "#9999FF", "#CC99FF", "#FF99FF",
+        "#660000", "#663300", "#336600", "#003366", "#000066", "#330066", "#660033", "#555555"
+    ];
 
-    for (let i = 0; i < 52; i++) {
-        const hue = (i * 360) / 52;
-        colors.push(`hsl(${hue}, 80%, 60%)`);
-    }
-
-    colors.slice(0, 64).forEach((hex, index) => {
+    colors.forEach((hex, index) => {
         const chip = document.createElement('div');
         chip.className = 'color-chip' + (index === 6 ? ' selected' : '');
         chip.style.backgroundColor = hex;
@@ -43,17 +46,27 @@ window.addEventListener('DOMContentLoaded', () => {
         paletteEl.appendChild(chip);
     });
 
-    // 2. 도구 선택
+    // --- 2. 도구 선택 및 커서 변경 ---
     const toolButtons = document.querySelectorAll('.tool-btn');
     toolButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             toolButtons.forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             currentTool = e.target.getAttribute('data-tool');
+
+            // 도구에 맞는 커서 클래스 갱신
+            canvas.className = "";
+            if (currentTool === 'pen') {
+                canvas.classList.add('tool-pen');
+            } else if (currentTool === 'colored-pencil') {
+                canvas.classList.add('tool-colored-pencil');
+            } else if (currentTool === 'bucket') {
+                canvas.classList.add('tool-bucket');
+            }
         });
     });
 
-    // 3. 좌표 계산
+    // --- 3. 좌표 계산 ---
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -64,7 +77,7 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // 4. 이벤트 핸들러
+    // --- 4. 이벤트 핸들러 ---
     canvas.addEventListener('mousedown', handleActionStart);
     canvas.addEventListener('touchstart', (e) => { handleActionStart(e); e.preventDefault(); });
 
@@ -110,7 +123,7 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
-    // 5. 색상 변환 유틸리티
+    // --- 5. 색상 변환 유틸리티 ---
     function hexToRgba(hex) {
         if (hex.startsWith('#')) {
             let c = hex.substring(1);
@@ -128,7 +141,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // 6. 경계선 기반 페인트 버킷 (외곽선 안쪽 빈 공간 채우기)
+    // --- 6. 페인트 버킷 알고리즘 ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
@@ -142,14 +155,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
 
-        // 1. 검은색 외곽선(어두운 선)을 클릭한 경우 채우지 않음
         if (startR < 80 && startG < 80 && startB < 80) return;
-
-        // 2. 이미 채우려는 색과 완전히 같은 경우 중단
         if (startR === fillR && startG === fillG && startB === fillB) return;
 
-        // 기준이 되는 '채워야 할 대상 색상'(클릭한 곳의 기존 색상 또는 흰색 계열 배경)을 정합니다.
-        // 이로써 이미 색칠된 구역이든 빈 공간이든 상관없이 클릭한 구역의 색상 영역 전체가 타겟이 됩니다.
         const targetR = startR;
         const targetG = startG;
         const targetB = startB;
@@ -169,15 +177,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            // 경계선(어두운 선, R/G/B 모두 80 미만)을 만나면 막힘
             if (r < 80 && g < 80 && b < 80) continue;
-
-            // 클릭한 지점의 색상 성분과 유사한 영역(같은 칸 내부)이 아니면 퍼져나가지 않음
             if (Math.abs(r - targetR) > 30 || Math.abs(g - targetG) > 30 || Math.abs(b - targetB) > 30) continue;
 
             visited[idx] = 1;
 
-            // 새로운 색상으로 칠하기
             data[pixelPos] = fillR;
             data[pixelPos + 1] = fillG;
             data[pixelPos + 2] = fillB;
