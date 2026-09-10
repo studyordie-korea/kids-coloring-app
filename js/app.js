@@ -18,16 +18,13 @@ window.addEventListener('DOMContentLoaded', () => {
     let currentColor = "#FF0000";
     let currentTool = "pen";
 
-    // 초기 커서 클래스 설정
     canvas.className = "tool-pen";
 
     // --- 1. 32 컬러 팔레트 동적 생성 ---
     const paletteEl = document.getElementById('palette');
     const colors = [
-        // 기본 무채색 및 대표 선명한 색상 (16개)
         "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", 
         "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#FF1493", "#8B4513", "#FFC0CB",
-        // 아이들이 쓰기 좋은 화사한 파스텔 및 중간 계열 색상 (16개)
         "#FF9999", "#FFCC99", "#FFFF99", "#99FF99", "#99FFFF", "#9999FF", "#CC99FF", "#FF99FF",
         "#660000", "#663300", "#336600", "#003366", "#000066", "#330066", "#660033", "#555555"
     ];
@@ -54,7 +51,6 @@ window.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('active');
             currentTool = e.target.getAttribute('data-tool');
 
-            // 도구에 맞는 커서 클래스 갱신
             canvas.className = "";
             if (currentTool === 'pen') {
                 canvas.classList.add('tool-pen');
@@ -141,12 +137,14 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 6. 페인트 버킷 알고리즘 ---
+    // --- 6. 개선된 페인트 버킷 알고리즘 (Flood Fill) ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
         const width = canvas.width;
         const height = canvas.height;
+
+        if (startX < 0 || startX >= width || startY < 0 || startY >= height) return;
 
         const startIndex = (startY * width + startX) * 4;
         const startR = data[startIndex];
@@ -155,12 +153,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
 
-        if (startR < 80 && startG < 80 && startB < 80) return;
-        if (startR === fillR && startG === fillG && startB === fillB) return;
+        // 1. 검은색/어두운 외곽선(임계값 90 미만)을 클릭한 경우 채우지 않음
+        if (startR < 90 && startG < 90 && startB < 90) return;
 
-        const targetR = startR;
-        const targetG = startG;
-        const targetB = startB;
+        // 2. 이미 채우려는 색과 완전히 같은 경우 중단
+        if (startR === fillR && startG === fillG && startB === fillB) return;
 
         const queue = [[startX, startY]];
         const visited = new Uint8Array(width * height);
@@ -177,8 +174,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            if (r < 80 && g < 80 && b < 80) continue;
-            if (Math.abs(r - targetR) > 30 || Math.abs(g - targetG) > 30 || Math.abs(b - targetB) > 30) continue;
+            // 3. 검은색 외곽선(어두운 선)을 만나면 채우기를 멈춤 (경계선 역할)
+            if (r < 90 && g < 90 && b < 90) continue;
+
+            // 4. 배경 및 이미 칠해진 영역의 색상 허용 오차를 넓게 잡아(60) 하얀색, 회색빛 공백 모두 원활히 채워지도록 함
+            if (Math.abs(r - startR) > 60 || Math.abs(g - startG) > 60 || Math.abs(b - startB) > 60) continue;
 
             visited[idx] = 1;
 
