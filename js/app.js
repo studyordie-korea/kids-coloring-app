@@ -5,12 +5,17 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.width = 600;
     canvas.height = 450;
 
-    // 밑그림 이미지 로드
+    // 밑그림 이미지 로드 및 배경 흰색 초기화 처리
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg";
     
     img.onload = () => {
+        // 1. 먼저 캔버스 전체를 완벽한 흰색으로 깨끗하게 채웁니다.
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 2. 그 위에 밑그림(외곽선)을 그립니다.
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
 
@@ -137,7 +142,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 6. 개선된 페인트 버킷 알고리즘 (Flood Fill) ---
+    // --- 6. 페인트 버킷 알고리즘 (Flood Fill) ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
@@ -174,11 +179,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            // 3. 검은색 외곽선(어두운 선)을 만나면 채우기를 멈춤 (경계선 역할)
+            // 3. 검은색 외곽선(어두운 선)을 만나면 채우기를 멈춤
             if (r < 90 && g < 90 && b < 90) continue;
 
-            // 4. 배경 및 이미 칠해진 영역의 색상 허용 오차를 넓게 잡아(60) 하얀색, 회색빛 공백 모두 원활히 채워지도록 함
-            if (Math.abs(r - startR) > 60 || Math.abs(g - startG) > 60 || Math.abs(b - startB) > 60) continue;
+            // 4. 클릭한 지점의 색상과 유사한 영역을 채움 (배경이 흰색으로 통일되어 정상 작동)
+            if (Math.abs(r - startR) > 40 || Math.abs(g - startG) > 40 || Math.abs(b - startB) > 40) continue;
 
             visited[idx] = 1;
 
