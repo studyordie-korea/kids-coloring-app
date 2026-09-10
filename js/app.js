@@ -5,14 +5,85 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.width = 600;
     canvas.height = 450;
 
-    // 테스트용 흑백 밑그림 이미지 불러오기 (임시 오픈소스 선화 이미지)
+    // 밑그림 이미지 로드
     const img = new Image();
     img.crossOrigin = "anonymous";
-    // 간단한 곰돌이/동물 외곽선 대체 이미지 링크
-    img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg"; // (나중에 아이들이 좋아하는 선화로 교체 가능)
+    img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg";
     
     img.onload = () => {
-        // 이미지를 캔버스 크기에 딱 맞게 그리기
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
+
+    // 드로잉 상태 변수
+    let isDrawing = false;
+    let currentColor = "#FF0000"; // 기본 빨간색
+    let currentTool = "pen";
+
+    // 도구 선택 버튼 이벤트
+    const toolButtons = document.querySelectorAll('.tool-btn');
+    toolButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            toolButtons.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentTool = e.target.getAttribute('data-tool');
+        });
+    });
+
+    // 색상 칩 선택 이벤트
+    const colorChips = document.querySelectorAll('.color-chip');
+    colorChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            currentColor = e.target.getAttribute('data-color');
+        });
+    });
+
+    // 마우스 및 터치 이벤트 처리
+    function getPosition(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', drawing);
+    canvas.addEventListener('mouseup', stopDraw);
+    
+    canvas.addEventListener('touchstart', (e) => { startDraw(e); e.preventDefault(); });
+    canvas.addEventListener('touchmove', (e) => { drawing(e); e.preventDefault(); });
+    canvas.addEventListener('touchend', stopDraw);
+
+    function startDraw(e) {
+        isDrawing = true;
+        const pos = getPosition(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function drawing(e) {
+        if (!isDrawing) return;
+        const pos = getPosition(e);
+
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = currentTool === 'colored-pencil' ? 3 : 8; // 색연필은 얇고 사각거리게, 사인펜은 굵직하게
+        ctx.lineCap = 'round';
+
+        // 색연필 느낌을 위한 투명도 조절 (임시 효과)
+        if (currentTool === 'colored-pencil') {
+            ctx.globalAlpha = 0.6;
+        } else {
+            ctx.globalAlpha = 1.0;
+        }
+
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    }
+
+    function stopDraw() {
+        isDrawing = false;
+        ctx.closePath();
+    }
 });
