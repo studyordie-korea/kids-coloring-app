@@ -21,6 +21,7 @@ h1 {
     margin-bottom: 10px;
 }
 
+/* 도구별 커서 스타일이 적용되는 캔버스 */
 canvas {
     background-color: #FFFFFF;
     border: 4px solid #4D96FF;
@@ -29,7 +30,19 @@ canvas {
     touch-action: none;
 }
 
-/* 도구 및 팔레트 UI 스타일 */
+/* 도구별 마우스 커서 지정 */
+canvas.tool-pen {
+    cursor: crosshair;
+}
+
+canvas.tool-colored-pencil {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>') 0 24, auto;
+}
+
+canvas.tool-bucket {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2a2 2 0 0 0 2.8 0L19 11z"></path><path d="M5 2l5 5"></path><path d="M2 22h20"></path></svg>') 12 12, auto;
+}
+
 #ui-container {
     margin-top: 15px;
     display: flex;
@@ -59,11 +72,9 @@ canvas {
     color: white;
 }
 
-/* 64컬러 팔레트 스타일 (8열 그리드) */
+/* 32컬러 팔레트 스타일 (16열 2줄) */
 #palette-container {
     width: 600px;
-    max-height: 90px;
-    overflow-y: auto;
     background: white;
     padding: 8px;
     border-radius: 12px;
@@ -72,30 +83,21 @@ canvas {
 
 #palette {
     display: grid;
-    grid-template-columns: repeat(16, 1fr); /* 16열씩 4줄 = 64컬러 */
-    gap: 4px;
+    grid-template-columns: repeat(16, 1fr); /* 16열씩 2줄 = 32컬러 */
+    gap: 6px;
 }
 
 .color-chip {
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     border: 1px solid #ddd;
 }
 
 .color-chip.selected {
-    transform: scale(1.2);
+    transform: scale(1.15);
     border: 2px solid #333;
     z-index: 10;
-}
-
-.color-chip {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    border: 2px solid white;
 }
