@@ -59,9 +59,36 @@ canvas {
     color: white;
 }
 
+/* 64컬러 팔레트 스타일 (8열 그리드) */
+#palette-container {
+    width: 600px;
+    max-height: 90px;
+    overflow-y: auto;
+    background: white;
+    padding: 8px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 #palette {
-    display: flex;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(16, 1fr); /* 16열씩 4줄 = 64컬러 */
+    gap: 4px;
+}
+
+.color-chip {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    border: 1px solid #ddd;
+}
+
+.color-chip.selected {
+    transform: scale(1.2);
+    border: 2px solid #333;
+    z-index: 10;
 }
 
 .color-chip {
