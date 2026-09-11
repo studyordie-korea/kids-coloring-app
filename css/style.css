@@ -18,37 +18,84 @@ body {
 h1 {
     color: #FF6B6B;
     font-size: 20px;
-    margin: 5px 0 10px 0;
+    margin: 5px 0 8px 0;
 }
 
-/* 상단 옵션 패널 스타일 */
+/* 상단 옵션 패널 스타일 (썸네일 선택형) */
 #option-panel {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     width: 600px;
     margin-bottom: 8px;
     background: white;
-    padding: 8px 12px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     box-sizing: border-box;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
-}
-
-.option-group {
-    display: flex;
-    align-items: center;
     gap: 8px;
 }
 
-#sketch-select {
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+.option-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.option-title {
+    color: #333;
     font-size: 13px;
-    outline: none;
+}
+
+/* 가로 스크롤형 썸네일 선택 그리드 */
+#sketch-grid {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.sketch-thumb {
+    flex: 0 0 75px;
+    height: 60px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #555;
+    transition: all 0.2s;
+    text-align: center;
+    padding: 2px;
+}
+
+.sketch-thumb:hover {
+    border-color: #4D96FF;
+    background: #F0F6FF;
+}
+
+.sketch-thumb.selected {
+    border: 3px solid #FF6B6B;
+    background: #FFE8E8;
+    color: #D32F2F;
+    font-weight: bold;
+}
+
+.option-section-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #eee;
+    padding-top: 6px;
+    width: 100%;
 }
 
 #texture-buttons {
@@ -95,10 +142,10 @@ canvas.tool-bucket {
 }
 
 #ui-container {
-    margin-top: 10px;
+    margin-top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
 }
 
