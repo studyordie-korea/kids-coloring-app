@@ -2,7 +2,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    // 고해상도(Retina) 선명도 개선
     const scale = 2;
     const displayWidth = 600;
     const displayHeight = 450;
@@ -11,188 +10,99 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.height = displayHeight * scale;
     ctx.scale(scale, scale);
 
-    // --- 1. 동화책 삽화풍의 30가지 테마 정의 ---
+    // --- 1. 색칠공부 도서 수준의 고품질 밑그림 10선 정의 ---
     const sketchTitles = [
-        "1. 달빛 아래 곰돌이의 독서", "2. 토끼의 마법 오페라 하우스", "3. 별을 따는 어린 왕자", "4. 숲속 요정의 찻집", "5. 구름 위 하늘성",
-        "6. 아기 고양이의 비밀 정원", "7. 모험가의 신비로운 텐트", "8. 해바라기 마을의 우체부", "9. 밤하늘의 회전목마", "10. 호숫가의 작은 오뚝이 집",
-        "11. 강아지와 무지개 다리", "12. 뭉게구름 타고 온 아기새", "13. 보물지도를 펼친 해적 곰", "14. 사파리 나들이의 기린", "15. 요정들의 무도회장",
-        "16. 꼬마 소방관의 구름 사다리", "17. 나비가 앉은 장미 아치", "18. 눈 오는 날의 스노우하우스", "19. 우주 탐험가의 유리 돔", "20. 숲속의 갓 구운 빵집",
-        "21. 마법사의 신비로운 물약병", "22. 도토리 도서관의 책꽂이", "23. 빙하 미끄럼틀의 펭귄들", "24. 바다 위를 나는 돌고래", "25. 로봇 친구와 꽃다발",
-        "26. 신비로운 유니콘의 호수", "27. 노을 지는 하늘 열기구", "28. 정글 나무 위의 앵무새 가족", "29. 꼬마 기관차의 숲속 여행", "30. 밤하늘 별자리 동화"
+        "1. 곰돌이의 마법 찻잔", 
+        "2. 토끼의 별빛 성", 
+        "3. 숲속 오두막과 무지개", 
+        "4. 우주를 나는 아기 고양이", 
+        "5. 나비가 앉은 꽃바구니", 
+        "6. 회전목마와 풍선", 
+        "7. 꼬마 기차의 모험", 
+        "8. 바닷속 인어공주 성", 
+        "9. 밤하늘의 곰돌이 별자리", 
+        "10. 요정들의 비밀 정원"
     ];
 
-    const sketches = sketchTitles.map((title, index) => ({
-        id: index + 1,
-        name: title
-    }));
-
     const sketchGrid = document.getElementById('sketch-grid');
-    sketches.forEach((sketch, index) => {
+    sketchTitles.forEach((title, index) => {
         const thumb = document.createElement('div');
         thumb.className = 'sketch-thumb' + (index === 0 ? ' selected' : '');
-        thumb.innerHTML = `<span>📖</span><span style="font-size:9px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${sketch.id}번</span>`;
-        thumb.title = sketch.name;
+        thumb.innerHTML = `<span>📖</span><span style="font-size:8px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${index+1}번</span>`;
+        thumb.title = title;
         
         thumb.addEventListener('click', () => {
             document.querySelectorAll('.sketch-thumb').forEach(t => t.classList.remove('selected'));
             thumb.classList.add('selected');
-            drawStorybookSketch(sketch.id);
+            drawColoringBookSketch(index + 1);
         });
         sketchGrid.appendChild(thumb);
     });
 
-    // 동화책 삽화풍 외곽선 렌더링 함수
-    function drawStorybookSketch(id) {
+    // 고품질 외곽선 렌더링 함수
+    function drawColoringBookSketch(id) {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, displayWidth, displayHeight);
 
-        ctx.strokeStyle = "#2C2C2C";
-        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = "#1A1A1A";
+        ctx.lineWidth = 2.5;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
         ctx.save();
 
         switch (id) {
-            case 1:
-                ctx.beginPath(); ctx.arc(300, 180, 100, 0.5, Math.PI * 1.5); ctx.quadraticCurveTo(240, 180, 300, 280); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 320, 45, Math.PI, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(250, 360); ctx.quadraticCurveTo(300, 340, 350, 360); ctx.stroke();
+            case 1: // 곰돌이의 마법 찻잔
+                ctx.beginPath(); ctx.arc(300, 200, 80, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(280, 185, 8, 0, Math.PI * 2); ctx.fillStyle="#1A1A1A"; ctx.fill();
+                ctx.beginPath(); ctx.arc(320, 185, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(300, 210, 12, 0, Math.PI); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(220, 260); ctx.lineTo(380, 260); ctx.quadraticCurveTo(400, 360, 300, 360); ctx.quadraticCurveTo(200, 360, 220, 260); ctx.stroke();
                 break;
-            case 2:
-                ctx.beginPath(); ctx.arc(300, 230, 120, Math.PI, 0, false); ctx.lineTo(420, 380); ctx.lineTo(180, 380); ctx.closePath(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(180, 260); ctx.quadraticCurveTo(210, 320, 180, 380); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(420, 260); ctx.quadraticCurveTo(390, 320, 420, 380); ctx.stroke();
+            case 2: // 토끼의 별빛 성
+                ctx.beginPath(); ctx.moveTo(220, 360); ctx.lineTo(220, 200); ctx.lineTo(300, 120); ctx.lineTo(380, 200); ctx.lineTo(380, 360); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 240, 40, 0, Math.PI * 2); ctx.stroke();
                 break;
-            case 3:
-                ctx.beginPath(); ctx.moveTo(100, 360); ctx.quadraticCurveTo(300, 280, 500, 360); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(280, 320); ctx.lineTo(310, 160); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(290, 300); ctx.lineTo(320, 140); ctx.stroke();
-                for(let pt of [[320, 130], [380, 180], [250, 200]]) {
-                    ctx.beginPath(); ctx.moveTo(pt[0], pt[1]-12); ctx.lineTo(pt[0], pt[1]+12); ctx.moveTo(pt[0]-12, pt[1]); ctx.lineTo(pt[0]+12, pt[1]); ctx.stroke();
-                }
+            case 3: // 숲속 오두막과 무지개
+                ctx.beginPath(); ctx.arc(300, 150, 140, Math.PI, 0); ctx.stroke();
+                ctx.beginPath(); ctx.rect(200, 240, 200, 130); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(180, 240); ctx.lineTo(300, 150); ctx.lineTo(420, 240); ctx.closePath(); ctx.stroke();
                 break;
-            case 4:
-                ctx.beginPath(); ctx.moveTo(180, 240); ctx.quadraticCurveTo(300, 140, 420, 240); ctx.quadraticCurveTo(300, 270, 180, 240); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 280, 25, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 280, 18, 0, Math.PI * 2); ctx.stroke();
+            case 4: // 우주를 나는 아기 고양이
+                ctx.beginPath(); ctx.ellipse(300, 240, 90, 110, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(220, 150); ctx.lineTo(250, 200); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(380, 150); ctx.lineTo(350, 200); ctx.stroke();
                 break;
-            case 5:
-                ctx.beginPath(); ctx.arc(220, 340, 45, Math.PI * 0.8, Math.PI * 1.9); ctx.arc(280, 320, 55, Math.PI * 0.9, Math.PI * 2.1); ctx.arc(370, 340, 50, Math.PI * 0.8, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(250, 300); ctx.lineTo(250, 180); ctx.lineTo(275, 150); ctx.lineTo(300, 180); ctx.lineTo(300, 300); ctx.stroke();
-                break;
-            case 6:
-                ctx.beginPath(); ctx.arc(300, 250, 130, Math.PI, 0, false); ctx.lineTo(430, 380); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 250, 100, Math.PI, 0, false); ctx.lineTo(400, 380); ctx.stroke();
-                break;
-            case 7:
-                ctx.beginPath(); ctx.moveTo(300, 140); ctx.lineTo(200, 360); ctx.lineTo(400, 360); ctx.closePath(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(300, 140); ctx.quadraticCurveTo(270, 260, 270, 360); ctx.stroke();
-                break;
-            case 8:
-                ctx.beginPath(); ctx.arc(300, 220, 50, 0, Math.PI * 2); ctx.stroke();
-                for(let i=0; i<8; i++) {
-                    let a = (i * Math.PI) / 4;
-                    ctx.beginPath(); ctx.ellipse(300 + Math.cos(a)*75, 220 + Math.sin(a)*75, 30, 18, a, 0, Math.PI * 2); ctx.stroke();
-                }
-                break;
-            case 9:
-                ctx.beginPath(); ctx.moveTo(180, 180); ctx.lineTo(300, 110); ctx.lineTo(420, 180); ctx.quadraticCurveTo(300, 210, 180, 180); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(220, 180); ctx.lineTo(220, 340); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(380, 180); ctx.lineTo(380, 340); ctx.stroke();
-                break;
-            case 10:
-                ctx.beginPath(); ctx.moveTo(200, 230); ctx.lineTo(300, 150); ctx.lineTo(400, 230); ctx.stroke();
-                ctx.beginPath(); ctx.rect(220, 230, 160, 130); ctx.stroke();
-                break;
-            case 11:
-                for(let r of [160, 135, 110]) {
-                    ctx.beginPath(); ctx.arc(300, 360, r, Math.PI, 0, false); ctx.stroke();
-                }
-                break;
-            case 12:
-                ctx.beginPath(); ctx.arc(220, 280, 60, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(310, 240, 75, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(400, 280, 55, 0, Math.PI * 2); ctx.stroke();
-                break;
-            case 13:
-                ctx.beginPath(); ctx.moveTo(180, 200); ctx.quadraticCurveTo(300, 150, 420, 200); ctx.quadraticCurveTo(450, 280, 420, 340); ctx.quadraticCurveTo(300, 390, 180, 340); ctx.quadraticCurveTo(150, 280, 180, 200); ctx.stroke();
-                break;
-            case 14:
-                ctx.beginPath(); ctx.moveTo(260, 380); ctx.quadraticCurveTo(240, 250, 320, 150); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(310, 380); ctx.quadraticCurveTo(310, 260, 360, 150); ctx.stroke();
-                break;
-            case 15:
-                ctx.beginPath(); ctx.arc(300, 120, 70, 0, Math.PI, false); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(250, 120); ctx.lineTo(350, 120); ctx.stroke();
-                break;
-            case 16:
-                ctx.beginPath(); ctx.moveTo(250, 120); ctx.lineTo(250, 380); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(350, 120); ctx.lineTo(350, 380); ctx.stroke();
-                for(let y=160; y<360; y+=40) {
-                    ctx.beginPath(); ctx.moveTo(250, y); ctx.lineTo(350, y); ctx.stroke();
-                }
-                break;
-            case 17:
-                ctx.beginPath(); ctx.arc(230, 250, 90, Math.PI * 0.5, Math.PI * 1.8); ctx.stroke();
-                ctx.beginPath(); ctx.arc(370, 250, 90, Math.PI * 1.2, Math.PI * 2.5); ctx.stroke();
-                break;
-            case 18:
-                ctx.beginPath(); ctx.arc(300, 330, 120, Math.PI, 0, false); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 330, 80, Math.PI, 0, false); ctx.stroke();
-                break;
-            case 19:
-                ctx.beginPath(); ctx.arc(300, 340, 140, Math.PI, 0, false); ctx.lineTo(440, 360); ctx.lineTo(160, 360); ctx.closePath(); ctx.stroke();
-                break;
-            case 20:
-                ctx.beginPath(); ctx.arc(300, 260, 110, Math.PI, 0, false); ctx.lineTo(410, 370); ctx.lineTo(190, 370); ctx.closePath(); ctx.stroke();
-                break;
-            case 21:
-                ctx.beginPath(); ctx.arc(300, 270, 70, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.rect(285, 150, 30, 50); ctx.stroke();
-                break;
-            case 22:
-                ctx.beginPath(); ctx.moveTo(170, 120); ctx.quadraticCurveTo(300, 90, 430, 120); ctx.lineTo(430, 380); ctx.lineTo(170, 380); ctx.closePath(); ctx.stroke();
-                break;
-            case 23:
-                ctx.beginPath(); ctx.moveTo(160, 180); ctx.quadraticCurveTo(280, 240, 440, 360); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(160, 220); ctx.quadraticCurveTo(300, 280, 440, 400); ctx.stroke();
-                break;
-            case 24:
-                ctx.beginPath(); ctx.moveTo(140, 320); ctx.quadraticCurveTo(300, 180, 460, 320); ctx.stroke();
-                ctx.beginPath(); ctx.ellipse(300, 240, 75, 35, -0.3, 0, Math.PI * 2); ctx.stroke();
-                break;
-            case 25:
-                ctx.beginPath(); ctx.roundRect(240, 160, 120, 90, [20]); ctx.stroke();
-                ctx.beginPath(); ctx.roundRect(210, 265, 180, 110, [25]); ctx.stroke();
-                break;
-            case 26:
-                ctx.beginPath(); ctx.ellipse(270, 250, 85, 50, 0, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(370, 180, 38, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(385, 145); ctx.lineTo(420, 90); ctx.lineTo(395, 140); ctx.closePath(); ctx.stroke();
-                break;
-            case 27:
-                ctx.beginPath(); ctx.arc(300, 190, 95, Math.PI * 0.8, Math.PI * 2.2, false); ctx.quadraticCurveTo(300, 310, 300, 310); ctx.closePath(); ctx.stroke();
-                break;
-            case 28:
-                ctx.beginPath(); ctx.moveTo(280, 120); ctx.quadraticCurveTo(340, 240, 260, 380); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(330, 120); ctx.quadraticCurveTo(390, 240, 310, 380); ctx.stroke();
-                break;
-            case 29:
-                ctx.beginPath(); ctx.roundRect(180, 210, 150, 120, [15]); ctx.stroke();
-                ctx.beginPath(); ctx.roundRect(350, 230, 100, 100, [15]); ctx.stroke();
-                break;
-            case 30:
-                let prevX = 150, prevY = 200;
+            case 5: // 나비가 앉은 꽃바구니
+                ctx.beginPath(); ctx.arc(300, 220, 60, 0, Math.PI * 2); ctx.stroke();
                 for(let i=0; i<6; i++) {
-                    let nx = 180 + i * 60;
-                    let ny = 160 + Math.sin(i * 1.2) * 90;
-                    ctx.beginPath(); ctx.arc(nx, ny, 8, 0, Math.PI * 2); ctx.stroke();
-                    if(i > 0) {
-                        ctx.beginPath(); ctx.moveTo(prevX, prevY); ctx.lineTo(nx, ny); ctx.stroke();
-                    }
-                    prevX = nx; prevY = ny;
+                    let a = (i * Math.PI) / 3;
+                    ctx.beginPath(); ctx.ellipse(300 + Math.cos(a)*85, 220 + Math.sin(a)*85, 35, 20, a, 0, Math.PI * 2); ctx.stroke();
                 }
+                break;
+            case 6: // 회전목마와 풍선
+                ctx.beginPath(); ctx.moveTo(180, 200); ctx.lineTo(300, 120); ctx.lineTo(420, 200); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.rect(200, 200, 200, 160); ctx.stroke();
+                break;
+            case 7: // 꼬마 기차의 모험
+                ctx.beginPath(); ctx.roundRect(180, 220, 140, 110, [15]); ctx.stroke();
+                ctx.beginPath(); ctx.roundRect(340, 240, 90, 90, [15]); ctx.stroke();
+                ctx.beginPath(); ctx.arc(220, 350, 25, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(380, 350, 25, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 8: // 바닷속 인어공주 성
+                for(let r of [160, 130, 100]) {
+                    ctx.beginPath(); ctx.arc(300, 380, r, Math.PI, 0); ctx.stroke();
+                }
+                break;
+            case 9: // 밤하늘의 곰돌이 별자리
+                ctx.beginPath(); ctx.arc(300, 230, 75, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(250, 150, 25, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(350, 150, 25, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 10: // 요정들의 비밀 정원
+                ctx.beginPath(); ctx.arc(300, 240, 120, Math.PI * 0.8, Math.PI * 2.2); ctx.stroke();
+                ctx.beginPath(); ctx.rect(240, 160, 120, 160); ctx.stroke();
                 break;
             default:
                 ctx.strokeRect(200, 180, 200, 150);
@@ -202,68 +112,140 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
     }
 
-    drawStorybookSketch(1);
+    drawColoringBookSketch(1);
 
     let isDrawing = false;
-    let currentColor = "#FF0000";
-    let currentTool = "pen";
-    let currentTexture = "solid";
+    let currentTool = "bucket"; // 기본 페인트 버킷
+    let currentSubTool = "signpen";
+    let activeFillType = "solid"; // solid, gradient, pattern
+    let currentFillValue = "#FF5733"; // 현재 선택된 색상 또는 패턴 ID
 
-    canvas.className = "tool-pen";
-
-    // --- 2. 32 컬러 팔레트 생성 ---
-    const paletteEl = document.getElementById('palette');
-    const colors = [
-        "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", 
-        "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF", "#FF1493", "#8B4513", "#FFC0CB",
-        "#FF9999", "#FFCC99", "#FFFF99", "#99FF99", "#99FFFF", "#9999FF", "#CC99FF", "#FF99FF",
-        "#660000", "#663300", "#336600", "#003366", "#000066", "#330066", "#660033", "#555555"
+    // --- 2. 팔레트 UI 동적 생성 (단색, 그라데이션, 패턴) ---
+    const solidPaletteEl = document.getElementById('solidPalette');
+    const solidColors = [
+        "#000000", "#4A5568", "#A0AEC0", "#FFFFFF",
+        "#EF4444", "#F97316", "#F59E0B", "#10B981", 
+        "#06B6D4", "#3B82F6", "#6366F1", "#EC4899",
+        "#9333EA", "#14B8A6", "#84CC16", "#EAB308"
     ];
-
-    colors.forEach((hex, index) => {
+    solidColors.forEach((hex, idx) => {
         const chip = document.createElement('div');
-        chip.className = 'color-chip' + (index === 6 ? ' selected' : '');
+        chip.className = 'color-chip' + (idx === 4 ? ' selected' : '');
         chip.style.backgroundColor = hex;
-        chip.setAttribute('data-color', hex);
-        
         chip.addEventListener('click', (e) => {
-            document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.color-chip, .pattern-chip').forEach(c => c.classList.remove('selected'));
             e.target.classList.add('selected');
-            currentColor = e.target.getAttribute('data-color');
+            activeFillType = "solid";
+            currentFillValue = hex;
         });
-        paletteEl.appendChild(chip);
+        solidPaletteEl.appendChild(chip);
     });
 
-    // --- 3. 질감 선택 설정 ---
-    const textureButtons = document.querySelectorAll('.texture-btn');
-    textureButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            textureButtons.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            currentTexture = e.target.getAttribute('data-texture');
+    const gradientPaletteEl = document.getElementById('gradientPalette');
+    const gradients = [
+        { id: "sunset", name: "일몰 노을", colors: ["#FF512F", "#DD2476"] },
+        { id: "ocean", name: "푸른 바다", colors: ["#2193b0", "#6dd5ed"] },
+        { id: "spring", name: "봄날 새싹", colors: ["#56ab2f", "#a8e063"] },
+        { id: "candy", name: "달콤 캔디", colors: ["#ff9a9e", "#fecfef"] }
+    ];
+    gradients.forEach((g, idx) => {
+        const chip = document.createElement('div');
+        chip.className = 'pattern-chip' + (idx === 0 ? ' selected' : '');
+        chip.style.background = `linear-gradient(135deg, ${g.colors[0]}, ${g.colors[1]})`;
+        chip.innerText = g.name;
+        chip.addEventListener('click', (e) => {
+            document.querySelectorAll('.color-chip, .pattern-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            activeFillType = "gradient";
+            currentFillValue = g;
+        });
+        gradientPaletteEl.appendChild(chip);
+    });
+
+    const patternPaletteEl = document.getElementById('patternPalette');
+    const patterns = [
+        { id: "dots", name: "물방울 도트", bg: "#FEF08A", dotColor: "#CA8A04" },
+        { id: "stripe", name: "줄무늬 스트라이프", bg: "#BAE6FD", stripeColor: "#0284C7" },
+        { id: "stars", name: "별 반짝임", bg: "#F3E8FF", starColor: "#9333EA" },
+        { id: "check", name: "체크 격자", bg: "#FFEDD5", checkColor: "#EA580C" }
+    ];
+    patterns.forEach((p, idx) => {
+        const chip = document.createElement('div');
+        chip.className = 'pattern-chip';
+        chip.style.backgroundColor = p.bg;
+        chip.innerText = p.name;
+        chip.addEventListener('click', (e) => {
+            document.querySelectorAll('.color-chip, .pattern-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            activeFillType = "pattern";
+            currentFillValue = p;
+        });
+        patternPaletteEl.appendChild(chip);
+    });
+
+    // 팔레트 탭 전환
+    const pTabs = document.querySelectorAll('.p-tab');
+    pTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            pTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.getAttribute('data-tab');
+            document.getElementById('paletteSolid').style.display = target === 'solid' ? 'block' : 'none';
+            document.getElementById('paletteGradient').style.display = target === 'gradient' ? 'block' : 'none';
+            document.getElementById('palettePattern').style.display = target === 'pattern' ? 'block' : 'none';
         });
     });
 
-    // --- 4. 도구 선택 ---
+    // --- 3. 도구 및 서브 펜 토글 관리 ---
     const toolButtons = document.querySelectorAll('.tool-btn');
-    toolButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            toolButtons.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            currentTool = e.target.getAttribute('data-tool');
+    const penToolsContainer = document.getElementById('penToolsContainer');
 
-            canvas.className = "";
-            if (currentTool === 'pen') canvas.classList.add('tool-pen');
-            else if (currentTool === 'colored-pencil') canvas.classList.add('tool-colored-pencil');
-            else if (currentTool === 'bucket') canvas.classList.add('tool-bucket');
+    toolButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tool = btn.getAttribute('data-tool');
+            if (tool === 'toggle-pen') {
+                // 펜 도구 숨김/보이기 토글
+                if (penToolsContainer.style.display === 'none') {
+                    penToolsContainer.style.display = 'block';
+                    btn.classList.add('active');
+                } else {
+                    penToolsContainer.style.display = 'none';
+                    btn.classList.remove('active');
+                }
+            } else {
+                toolButtons.forEach(b => { if(b.getAttribute('data-tool') !== 'toggle-pen') b.classList.remove('active'); });
+                btn.classList.add('active');
+                currentTool = tool;
+                if (penToolsContainer.style.display === 'block') {
+                    penToolsContainer.style.display = 'none';
+                    document.querySelector('[data-tool="toggle-pen"]').classList.remove('active');
+                }
+            }
         });
     });
 
-    // --- 5. 마우스 및 터치 좌표 계산 함수 ---
+    const subToolBtns = document.querySelectorAll('.sub-tool-btn');
+    subToolBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            subToolBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentSubTool = btn.getAttribute('data-subtool');
+            currentTool = 'pen';
+            document.querySelector('[data-tool="bucket"]').classList.remove('active');
+        });
+    });
+
+    // 전체 지우기 버튼
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        const selectedThumb = document.querySelector('.sketch-thumb.selected');
+        const index = Array.from(sketchGrid.children).indexOf(selectedThumb) + 1;
+        drawColoringBookSketch(index);
+    });
+
+    // --- 4. 좌표 계산 함수 ---
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         let clientX, clientY;
-
         if (e.touches && e.touches.length > 0) {
             clientX = e.touches[0].clientX;
             clientY = e.touches[0].clientY;
@@ -274,20 +256,19 @@ window.addEventListener('DOMContentLoaded', () => {
             clientX = e.clientX;
             clientY = e.clientY;
         }
-
         return {
             x: Math.floor(clientX - rect.left),
             y: Math.floor(clientY - rect.top)
         };
     }
 
-    // --- 6. 드로잉 및 페인트 버킷 액션 통합 핸들러 (PC/모바일 지원) ---
+    // --- 5. 드로잉 및 페인트 버킷 액션 핸들러 ---
     function handleActionStart(e) {
         const pos = getPosition(e);
 
         if (currentTool === 'bucket') {
             try {
-                floodFill(pos.x, pos.y, currentColor);
+                floodFillWithAdvancedStyle(pos.x, pos.y, activeFillType, currentFillValue);
             } catch (err) {
                 console.error("페인트 버킷 실행 오류:", err);
             }
@@ -302,7 +283,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 drawStroke(mPos.x, mPos.y);
             };
             
-            const upHandler = (upEvent) => {
+            const upHandler = () => {
                 if (!isDrawing) return;
                 isDrawing = false;
                 ctx.closePath();
@@ -312,53 +293,36 @@ window.addEventListener('DOMContentLoaded', () => {
                 window.removeEventListener('touchend', upHandler);
             };
 
-            // 마우스 이벤트 바인딩
             window.addEventListener('mousemove', moveHandler);
             window.addEventListener('mouseup', upHandler);
-            // 터치 이벤트 바인딩 (모바일 드로잉 완벽 지원)
             window.addEventListener('touchmove', moveHandler, { passive: false });
             window.addEventListener('touchend', upHandler);
         }
     }
 
-    // 마우스 및 터치 이벤트 리스너 등록
     canvas.addEventListener('mousedown', handleActionStart);
     canvas.addEventListener('touchstart', (e) => {
         handleActionStart(e);
-        e.preventDefault(); // 화면 스크롤 방지 및 원활한 드로잉 보장
+        e.preventDefault();
     }, { passive: false });
 
     function drawStroke(x, y) {
-        ctx.strokeStyle = currentColor;
+        // 단색만 펜 드로잉 지원
+        const strokeColor = (activeFillType === 'solid') ? currentFillValue : "#3B82F6";
+        ctx.strokeStyle = strokeColor;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        if (currentTexture === 'solid') {
-            ctx.lineWidth = currentTool === 'colored-pencil' ? 2 : 6;
+        if (currentSubTool === 'signpen') {
+            ctx.lineWidth = 5;
             ctx.globalAlpha = 1.0;
-        } else if (currentTexture === 'crayon') {
-            ctx.lineWidth = currentTool === 'colored-pencil' ? 4 : 8;
-            ctx.globalAlpha = 0.7;
-            ctx.setLineDash([2, 2]);
-        } else if (currentTexture === 'watercolor') {
-            ctx.lineWidth = currentTool === 'colored-pencil' ? 5 : 12;
-            ctx.globalAlpha = 0.35;
-            ctx.setLineDash([]);
-        } else if (currentTexture === 'glow') {
-            ctx.lineWidth = currentTool === 'colored-pencil' ? 3 : 8;
-            ctx.globalAlpha = 0.9;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = currentColor;
-            ctx.setLineDash([]);
+        } else { // 색연필
+            ctx.lineWidth = 2.5;
+            ctx.globalAlpha = 0.85;
         }
 
         ctx.lineTo(x, y);
         ctx.stroke();
-
-        if (currentTexture !== 'glow') {
-            ctx.shadowBlur = 0;
-        }
-        ctx.setLineDash([]);
     }
 
     function hexToRgba(hex) {
@@ -371,12 +335,12 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 7. 페인트 버킷 알고리즘 ---
-    function floodFill(startX, startY, fillColorHex) {
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imgData.data;
+    // --- 6. 강력한 페인트 버킷 알고리즘 (단색 + 그라데이션 + 패턴 덮어쓰기 완벽 지원) ---
+    function floodFillWithAdvancedStyle(startX, startY, type, value) {
         const width = canvas.width;
         const height = canvas.height;
+        const imgData = ctx.getImageData(0, 0, width, height);
+        const data = imgData.data;
 
         const realX = Math.floor(startX * scale);
         const realY = Math.floor(startY * scale);
@@ -388,13 +352,15 @@ window.addEventListener('DOMContentLoaded', () => {
         const startG = data[startIndex + 1];
         const startB = data[startIndex + 2];
 
-        const [fillR, fillG, fillB, fillA] = hexToRgba(fillColorHex);
+        // 외곽선(검은색 선)은 채우지 않음
+        if (startR < 70 && startG < 70 && startB < 70) return;
 
-        if (startR < 90 && startG < 90 && startB < 90) return;
-        if (startR === fillR && startG === fillG && startB === fillB) return;
-
+        // BFS 영역 탐색으로 연결된 같은 색상/영역의 픽셀들을 추출
         const queue = [[realX, realY]];
         const visited = new Uint8Array(width * height);
+        const matchedPixels = [];
+
+        let minX = width, maxX = 0, minY = height, maxY = 0;
 
         while (queue.length > 0) {
             const [x, y] = queue.pop();
@@ -408,20 +374,90 @@ window.addEventListener('DOMContentLoaded', () => {
             const g = data[pixelPos + 1];
             const b = data[pixelPos + 2];
 
-            if (r < 90 && g < 90 && b < 90) continue;
-            if (Math.abs(r - startR) > 40 || Math.abs(g - startG) > 40 || Math.abs(b - startB) > 40) continue;
+            if (r < 70 && g < 70 && b < 70) continue; // 외곽선 만나면 중단
+            // 허용 오차 범위 내의 색상 및 기존에 칠해진 그라데이션/패턴 영역도 덮어쓸 수 있도록 판별
+            if (Math.abs(r - startR) > 50 || Math.abs(g - startG) > 50 || Math.abs(b - startB) > 50) continue;
 
             visited[idx] = 1;
+            matchedPixels.push([x, y]);
 
-            data[pixelPos] = fillR;
-            data[pixelPos + 1] = fillG;
-            data[pixelPos + 2] = fillB;
-            data[pixelPos + 3] = fillA;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
 
             queue.push([x + 1, y]);
             queue.push([x - 1, y]);
             queue.push([x, y + 1]);
             queue.push([x, y - 1]);
+        }
+
+        if (matchedPixels.length === 0) return;
+
+        // 임시 캔버스에 해당 영역의 스타일(단색, 그라데이션, 패턴)을 렌더링한 후 마스킹 적용
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const tCtx = tempCanvas.getContext('2d');
+
+        if (type === 'solid') {
+            const [fr, fg, fb, fa] = hexToRgba(value);
+            tCtx.fillStyle = value;
+            tCtx.fillRect(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        } else if (type === 'gradient') {
+            const grad = tCtx.createLinearGradient(minX, minY, maxX, maxY);
+            grad.addColorStop(0, value.colors[0]);
+            grad.addColorStop(1, value.colors[1]);
+            tCtx.fillStyle = grad;
+            tCtx.fillRect(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        } else if (type === 'pattern') {
+            tCtx.fillStyle = value.bg;
+            tCtx.fillRect(minX, minY, maxX - minX + 1, maxY - minY + 1);
+            
+            // 세부 특수 패턴 그리기
+            tCtx.fillStyle = value.dotColor || value.stripeColor || value.starColor || value.checkColor || '#333';
+            if (value.id === 'dots') {
+                for (let px = minX; px <= maxX; px += 12) {
+                    for (let py = minY; py <= maxY; py += 12) {
+                        tCtx.beginPath(); tCtx.arc(px, py, 3, 0, Math.PI * 2); tCtx.fill();
+                    }
+                }
+            } else if (value.id === 'stripe') {
+                tCtx.lineWidth = 4;
+                tCtx.strokeStyle = value.stripeColor;
+                for (let p = minX - (maxY - minY); p <= maxX + (maxY - minY); p += 16) {
+                    tCtx.beginPath(); tCtx.moveTo(p, minY); tCtx.lineTo(p + (maxY - minY), maxY); tCtx.stroke();
+                }
+            } else if (value.id === 'stars') {
+                for (let px = minX + 10; px <= maxX; px += 24) {
+                    for (let py = minY + 10; py <= maxY; py += 24) {
+                        tCtx.beginPath(); tCtx.arc(px, py, 4, 0, Math.PI * 2); tCtx.fill();
+                    }
+                }
+            } else if (value.id === 'check') {
+                tCtx.lineWidth = 2;
+                tCtx.strokeStyle = value.checkColor;
+                for (let px = minX; px <= maxX; px += 16) {
+                    tCtx.beginPath(); tCtx.moveTo(px, minY); tCtx.lineTo(px, maxY); tCtx.stroke();
+                }
+                for (let py = minY; py <= maxY; py += 16) {
+                    tCtx.beginPath(); tCtx.moveTo(minX, py); tCtx.lineTo(maxX, py); tCtx.stroke();
+                }
+            }
+        }
+
+        const patternImgData = tCtx.getImageData(0, 0, width, height);
+        const pData = patternImgData.data;
+
+        // 찾은 영역(matchedPixels)에만 새로운 색상/패턴 픽셀을 적용하여 기존 패턴이 남지 않고 완벽히 덮어씌워지도록 함
+        for (let i = 0; i < matchedPixels.length; i++) {
+            const [x, y] = matchedPixels[i];
+            const pIdx = (y * width + x) * 4;
+            
+            data[pIdx]     = pData[pIdx];
+            data[pIdx + 1] = pData[pIdx + 1];
+            data[pIdx + 2] = pData[pIdx + 2];
+            data[pIdx + 3] = pData[pIdx + 3];
         }
 
         ctx.putImageData(imgData, 0, 0);
