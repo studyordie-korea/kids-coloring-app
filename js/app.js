@@ -2,7 +2,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    // 고해상도(Retina) 선명도 개선: 캔버스 내부 해상도를 2배로 설정
+    // 고해상도(Retina) 선명도 개선
     const scale = 2;
     const displayWidth = 600;
     const displayHeight = 450;
@@ -11,14 +11,14 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.height = displayHeight * scale;
     ctx.scale(scale, scale);
 
-    // --- 1. 만 7세 수준의 30가지 유니크하고 정교한 밑그림 목록 정의 ---
+    // --- 1. 동화책 삽화풍의 30가지 테마 정의 ---
     const sketchTitles = [
-        "1. 3단 웨딩 케이크와 촛불", "2. 우주 비행사와 행성 탐사", "3. 산호초와 열대어 무리", "4. 동물들의 피크닉 파티", "5. 중세 시대 마법의 성",
-        "6. 티라노사우루스와 화산", "7. 버섯 요정의 숲속 마을", "8. 해바라기 밭과 꿀벌", "9. 대관람차와 롤러코스터", "10. 캠핑 트레일러와 모닥불",
-        "11. 강아지 놀이터와 장난감", "12. 무지개 다리와 아기 구름", "13. 보물섬과 해적선 돛", "14. 사파리의 사자와 얼룩말", "15. 우아한 무도회 드레스",
-        "16. 대형 소방차와 사다리", "17. 나비와 화려한 장미 정원", "18. 눈사람과 겨울 스노우볼", "19. 첨단 우주 정거장", "20. 이탈리안 화덕 피가게",
-        "21. 꼬마 마법사의 물약 실험", "22. 숲속 도서관과 책꽂이", "23. 빙하와 슬라이딩 펭귄", "24. 파도를 넘는 돌고래", "25. 변신 로봇 전사",
-        "26. 신비로운 유니콘과 무지개", "27. 거대한 하늘 열기구", "28. 밀림의 알록달록 앵무새", "29. 증기기관차 기차여행", "30. 은하수와 별자리 지도"
+        "1. 달빛 아래 곰돌이의 독서", "2. 토끼의 마법 오페라 하우스", "3. 별을 따는 어린 왕자", "4. 숲속 요정의 찻집", "5. 구름 위 하늘성",
+        "6. 아기 고양이의 비밀 정원", "7. 모험가의 신비로운 텐트", "8. 해바라기 마을의 우체부", "9. 밤하늘의 회전목마", "10. 호숫가의 작은 오뚝이 집",
+        "11. 강아지와 무지개 다리", "12. 뭉게구름 타고 온 아기새", "13. 보물지도를 펼친 해적 곰", "14. 사파리 나들이의 기린", "15. 요정들의 무도회장",
+        "16. 꼬마 소방관의 구름 사다리", "17. 나비가 앉은 장미 아치", "18. 눈 오는 날의 스노우하우스", "19. 우주 탐험가의 유리 돔", "20. 숲속의 갓 구운 빵집",
+        "21. 마법사의 신비로운 물약병", "22. 도토리 도서관의 책꽂이", "23. 빙하 미끄럼틀의 펭귄들", "24. 바다 위를 나는 돌고래", "25. 로봇 친구와 꽃다발",
+        "26. 신비로운 유니콘의 호수", "27. 노을 지는 하늘 열기구", "28. 정글 나무 위의 앵무새 가족", "29. 꼬마 기관차의 숲속 여행", "30. 밤하늘 별자리 동화"
     ];
 
     const sketches = sketchTitles.map((title, index) => ({
@@ -30,268 +30,236 @@ window.addEventListener('DOMContentLoaded', () => {
     sketches.forEach((sketch, index) => {
         const thumb = document.createElement('div');
         thumb.className = 'sketch-thumb' + (index === 0 ? ' selected' : '');
-        thumb.innerHTML = `<span>🎨</span><span style="font-size:9px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${sketch.id}번</span>`;
+        thumb.innerHTML = `<span>📖</span><span style="font-size:9px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${sketch.id}번</span>`;
         thumb.title = sketch.name;
         
         thumb.addEventListener('click', () => {
             document.querySelectorAll('.sketch-thumb').forEach(t => t.classList.remove('selected'));
             thumb.classList.add('selected');
-            drawAge7Sketch(sketch.id);
+            drawStorybookSketch(sketch.id);
         });
         sketchGrid.appendChild(thumb);
     });
 
-    // 만 7세(초등 저학년) 수준의 정교하고 디테일한 30가지 밑그림 렌더링 함수
-    function drawAge7Sketch(id) {
+    // 동화책 삽화풍 외곽선 렌더링 함수 (도형 느낌 배제, 곡선 및 디테일 극대화)
+    function drawStorybookSketch(id) {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, displayWidth, displayHeight);
 
-        ctx.strokeStyle = "#222222";
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "#2C2C2C";
+        ctx.lineWidth = 2.2;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
         ctx.save();
 
         switch (id) {
-            case 1: // 1. 3단 웨딩 케이크와 촛불
-                ctx.strokeRect(210, 310, 180, 80);
-                ctx.strokeRect(235, 230, 130, 80);
-                ctx.strokeRect(260, 160, 80, 70);
-                // 촛불 3개
-                for(let cx of [280, 300, 320]) {
-                    ctx.beginPath(); ctx.rect(cx, 125, 6, 35); ctx.stroke();
-                    ctx.beginPath(); ctx.ellipse(cx+3, 115, 5, 10, 0, 0, Math.PI * 2); ctx.stroke();
+            case 1: // 1. 달빛 아래 곰돌이의 독서
+                // 초승달
+                ctx.beginPath(); ctx.arc(300, 180, 100, 0.5, Math.PI * 1.5); ctx.quadraticCurveTo(240, 180, 300, 280); ctx.stroke();
+                // 곰돌이 의자와 책
+                ctx.beginPath(); ctx.arc(300, 320, 45, Math.PI, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(250, 360); ctx.quadraticCurveTo(300, 340, 350, 360); ctx.stroke();
+                break;
+
+            case 2: // 2. 토끼의 마법 오페라 하우스
+                // 아치형 무대 외곽선
+                ctx.beginPath(); ctx.arc(300, 230, 120, Math.PI, 0, false); ctx.lineTo(420, 380); ctx.lineTo(180, 380); ctx.closePath(); ctx.stroke();
+                // 커튼 주름
+                ctx.beginPath(); ctx.moveTo(180, 260); ctx.quadraticCurveTo(210, 320, 180, 380); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(420, 260); ctx.quadraticCurveTo(390, 320, 420, 380); ctx.stroke();
+                break;
+
+            case 3: // 3. 별을 따는 어린 왕자
+                // 언덕 곡선
+                ctx.beginPath(); ctx.moveTo(100, 360); ctx.quadraticCurveTo(300, 280, 500, 360); ctx.stroke();
+                // 사다리와 별
+                ctx.beginPath(); ctx.moveTo(280, 320); ctx.lineTo(310, 160); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(290, 300); ctx.lineTo(320, 140); ctx.stroke();
+                // 별 반짝임
+                for(let pt of [[320, 130], [380, 180], [250, 200]]) {
+                    ctx.beginPath(); ctx.moveTo(pt[0], pt[1]-12); ctx.lineTo(pt[0], pt[1]+12); ctx.moveTo(pt[0]-12, pt[1]); ctx.lineTo(pt[0]+12, pt[1]); ctx.stroke();
                 }
-                // 크림 장식 물결
-                for(let x = 210; x < 390; x += 20) {
-                    ctx.beginPath(); ctx.arc(x + 10, 310, 10, 0, Math.PI); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(x + 25, 230, 8, 0, Math.PI); ctx.stroke();
+                break;
+
+            case 4: // 4. 숲속 요정의 찻집
+                // 버섯 오버레이 지붕
+                ctx.beginPath(); ctx.moveTo(180, 240); ctx.quadraticCurveTo(300, 140, 420, 240); ctx.quadraticCurveTo(300, 270, 180, 240); ctx.stroke();
+                // 창문과 찻잔
+                ctx.beginPath(); ctx.arc(300, 280, 25, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 280, 18, 0, Math.PI * 2); ctx.stroke();
+                break;
+
+            case 5: // 5. 구름 위 하늘성
+                // 구름 베이스
+                ctx.beginPath(); ctx.arc(220, 340, 45, Math.PI * 0.8, Math.PI * 1.9); ctx.arc(280, 320, 55, Math.PI * 0.9, Math.PI * 2.1); ctx.arc(370, 340, 50, Math.PI * 0.8, Math.PI * 2); ctx.stroke();
+                // 성 탑들
+                ctx.beginPath(); ctx.moveTo(250, 300); ctx.lineTo(250, 180); ctx.lineTo(275, 150); ctx.lineTo(300, 180); ctx.lineTo(300, 300); ctx.stroke();
+                break;
+
+            case 6: // 6. 아기 고양이의 비밀 정원
+                // 넝쿨 아치
+                ctx.beginPath(); ctx.arc(300, 250, 130, Math.PI, 0, false); ctx.lineTo(430, 380); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 250, 100, Math.PI, 0, false); ctx.lineTo(400, 380); ctx.stroke();
+                break;
+
+            case 7: // 7. 모험가의 신비로운 텐트
+                // 인디언 텐트 외곽선
+                ctx.beginPath(); ctx.moveTo(300, 140); ctx.lineTo(200, 360); ctx.lineTo(400, 360); ctx.closePath(); ctx.stroke();
+                // 입구 플랩
+                ctx.beginPath(); ctx.moveTo(300, 140); ctx.quadraticCurveTo(270, 260, 270, 360); ctx.stroke();
+                break;
+
+            case 8: // 8. 해바라기 마을의 우체부
+                // 큰 해바라기 송이
+                ctx.beginPath(); ctx.arc(300, 220, 50, 0, Math.PI * 2); ctx.stroke();
+                for(let i=0; i<8; i++) {
+                    let a = (i * Math.PI) / 4;
+                    ctx.beginPath(); ctx.ellipse(300 + Math.cos(a)*75, 220 + Math.sin(a)*75, 30, 18, a, 0, Math.PI * 2); ctx.stroke();
                 }
                 break;
 
-            case 2: // 2. 우주 비행사와 행성 탐사
-                ctx.beginPath(); ctx.arc(300, 220, 50, 0, Math.PI * 2); ctx.stroke(); // 헬멧
-                ctx.beginPath(); ctx.arc(300, 220, 38, 0, Math.PI * 2); ctx.stroke(); // 바이저
-                ctx.beginPath(); ctx.rect(265, 270, 70, 90); ctx.stroke(); // 몸체
-                // 달 표면 크레이터
-                ctx.beginPath(); ctx.arc(150, 360, 40, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(130, 340, 12, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(480, 150, 60, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.ellipse(480, 150, 90, 25, 0.4, 0, Math.PI * 2); ctx.stroke(); // 토성 고리
+            case 9: // 9. 밤하늘의 회전목마
+                // 상단 지붕 곡선
+                ctx.beginPath(); ctx.moveTo(180, 180); ctx.lineTo(300, 110); ctx.lineTo(420, 180); ctx.quadraticCurveTo(300, 210, 180, 180); ctx.stroke();
+                // 기둥들
+                ctx.beginPath(); ctx.moveTo(220, 180); ctx.lineTo(220, 340); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(380, 180); ctx.lineTo(380, 340); ctx.stroke();
                 break;
 
-            case 3: // 3. 산호초와 열대어 무리
-                for(let i = 0; i < 3; i++) {
-                    let ox = 150 + i * 130;
-                    ctx.beginPath(); ctx.ellipse(ox, 220, 45, 25, 0.2, 0, Math.PI * 2); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(ox-45, 220); ctx.lineTo(ox-80, 190); ctx.lineTo(ox-80, 250); ctx.closePath(); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(ox+20, 210, 4, 0, Math.PI * 2); ctx.fillStyle="#222"; ctx.fill();
+            case 10: // 10. 호숫가의 작은 오뚝이 집
+                // 오두막 본체 및 지붕 곡선
+                ctx.beginPath(); ctx.moveTo(200, 230); ctx.lineTo(300, 150); ctx.lineTo(400, 230); ctx.stroke();
+                ctx.beginPath(); ctx.rect(220, 230, 160, 130); ctx.stroke();
+                break;
+
+            case 11: // 11. 강아지와 무지개 다리
+                // 무지개 호곡선
+                for(let r of [160, 135, 110]) {
+                    ctx.beginPath(); ctx.arc(300, 360, r, Math.PI, 0, false); ctx.stroke();
                 }
-                // 해초 디테일
-                ctx.beginPath(); ctx.moveTo(80, 400); ctx.bezierCurveTo(110, 320, 60, 250, 90, 180); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(520, 400); ctx.bezierCurveTo(490, 300, 540, 220, 500, 150); ctx.stroke();
                 break;
 
-            case 4: // 4. 동물들의 피크닉 파티
-                // 곰돌이
-                ctx.beginPath(); ctx.arc(200, 230, 50, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(165, 185, 18, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(235, 185, 18, 0, Math.PI * 2); ctx.stroke();
-                // 토끼
-                ctx.beginPath(); ctx.arc(400, 250, 45, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.ellipse(385, 150, 12, 45, -0.2, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.ellipse(420, 150, 12, 45, 0.2, 0, Math.PI * 2); ctx.stroke();
-                // 피크닉 매트와 바구니
-                ctx.beginPath(); ctx.rect(240, 330, 120, 50); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 330, 25, Math.PI, Math.PI * 2); ctx.stroke();
+            case 12: // 12. 뭉게구름 타고 온 아기새
+                // 대형 구름 덩어리
+                ctx.beginPath(); ctx.arc(220, 280, 60, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(310, 240, 75, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(400, 280, 55, 0, Math.PI * 2); ctx.stroke();
                 break;
 
-            case 5: // 5. 중세 시대 마법의 성
-                ctx.strokeRect(230, 180, 140, 180);
-                ctx.strokeRect(150, 230, 60, 130);
-                ctx.strokeRect(390, 230, 60, 130);
-                // 지붕 성곽 장식
-                ctx.beginPath(); ctx.moveTo(215, 180); ctx.lineTo(300, 100); ctx.lineTo(385, 180); ctx.closePath(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(135, 230); ctx.lineTo(180, 170); ctx.lineTo(225, 230); ctx.closePath(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(375, 230); ctx.lineTo(420, 170); ctx.lineTo(465, 230); ctx.closePath(); ctx.stroke();
-                // 아치문과 창문
-                ctx.beginPath(); ctx.arc(300, 360, 25, Math.PI, 0, true); ctx.lineTo(325, 360); ctx.lineTo(275, 360); ctx.closePath(); ctx.stroke();
-                ctx.strokeRect(275, 210, 20, 35); ctx.strokeRect(305, 210, 20, 35);
+            case 13: // 13. 보물지도를 펼친 해적 곰
+                // 펼쳐진 지도 곡선 외곽선
+                ctx.beginPath(); ctx.moveTo(180, 200); ctx.quadraticCurveTo(300, 150, 420, 200); ctx.quadraticCurveTo(450, 280, 420, 340); ctx.quadraticCurveTo(300, 390, 180, 340); ctx.quadraticCurveTo(150, 280, 180, 200); ctx.stroke();
                 break;
 
-            case 6: // 6. 티라노사우루스와 화산
-                // 공룡 몸체
-                ctx.beginPath(); ctx.ellipse(280, 280, 90, 50, 0, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(370, 220, 35, 0, Math.PI * 2); ctx.stroke(); // 머리
-                ctx.beginPath(); ctx.moveTo(190, 290); ctx.lineTo(80, 340); ctx.lineTo(200, 340); ctx.closePath(); ctx.stroke(); // 꼬리
-                // 배경 화산
-                ctx.beginPath(); ctx.moveTo(400, 380); ctx.lineTo(500, 200); ctx.lineTo(530, 200); ctx.lineTo(600, 380); ctx.closePath(); ctx.stroke();
+            case 14: // 14. 사파리 나들이의 기린
+                // 우아한 목선
+                ctx.beginPath(); ctx.moveTo(260, 380); ctx.quadraticCurveTo(240, 250, 320, 150); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(310, 380); ctx.quadraticCurveTo(310, 260, 360, 150); ctx.stroke();
                 break;
 
-            case 7: // 7. 버섯 요정의 숲속 마을
-                // 대형 버섯 집
-                ctx.beginPath(); ctx.ellipse(300, 200, 110, 55, 0, 0, Math.PI * 2); ctx.stroke(); // 갓
-                ctx.strokeRect(260, 200, 80, 160); // 기둥
-                // 창문과 문
-                ctx.beginPath(); ctx.arc(300, 260, 18, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 360, 18, Math.PI, 0, true); ctx.lineTo(318, 360); ctx.lineTo(282, 360); ctx.closePath(); ctx.stroke();
+            case 15: // 15. 요정들의 무도회장
+                // 샹들리에 및 아치
+                ctx.beginPath(); ctx.arc(300, 120, 70, 0, Math.PI, false); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(250, 120); ctx.lineTo(350, 120); ctx.stroke();
                 break;
 
-            case 8: // 8. 해바라기 밭과 꿀벌
-                ctx.beginPath(); ctx.arc(300, 220, 45, 0, Math.PI * 2); ctx.stroke(); // 꽃심
-                for(let angle = 0; angle < Math.PI * 2; angle += Math.PI / 6) {
-                    let fx = 300 + Math.cos(angle) * 75;
-                    let fy = 220 + Math.sin(angle) * 75;
-                    ctx.beginPath(); ctx.arc(fx, fy, 22, 0, Math.PI * 2); ctx.stroke();
+            case 16: // 16. 꼬마 소방관의 구름 사다리
+                // 사다리 곡선
+                ctx.beginPath(); ctx.moveTo(250, 120); ctx.lineTo(250, 380); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(350, 120); ctx.lineTo(350, 380); ctx.stroke();
+                for(let y=160; y<360; y+=40) {
+                    ctx.beginPath(); ctx.moveTo(250, y); ctx.lineTo(350, y); ctx.stroke();
                 }
-                ctx.beginPath(); ctx.rect(292, 265, 16, 120); ctx.stroke(); // 줄기
                 break;
 
-            case 9: // 9. 대관람차와 롤러코스터
-                ctx.beginPath(); ctx.arc(300, 220, 110, 0, Math.PI * 2); ctx.stroke(); // 관람차 휠
+            case 17: // 17. 나비가 앉은 장미 아치
+                // 장미 덩굴 하트형 아치
+                ctx.beginPath(); ctx.arc(230, 250, 90, Math.PI * 0.5, Math.PI * 1.8); ctx.stroke();
+                ctx.beginPath(); ctx.arc(370, 250, 90, Math.PI * 1.2, Math.PI * 2.5); ctx.stroke();
+                break;
+
+            case 18: // 18. 눈 오는 날의 스노우하우스
+                // 이글루 돔 외곽선
+                ctx.beginPath(); ctx.arc(300, 330, 120, Math.PI, 0, false); ctx.stroke();
+                // 벽돌 결
+                ctx.beginPath(); ctx.arc(300, 330, 80, Math.PI, 0, false); ctx.stroke();
+                break;
+
+            case 19: // 19. 우주 탐험가의 유리 돔
+                // 거대한 반구 돔
+                ctx.beginPath(); ctx.arc(300, 340, 140, Math.PI, 0, false); ctx.lineTo(440, 360); ctx.lineTo(160, 360); ctx.closePath(); ctx.stroke();
+                break;
+
+            case 20: // 20. 숲속의 갓 구운 빵집
+                // 벽돌 화덕 아치
+                ctx.beginPath(); ctx.arc(300, 260, 110, Math.PI, 0, false); ctx.lineTo(410, 370); ctx.lineTo(190, 370); ctx.closePath(); ctx.stroke();
+                break;
+
+            case 21: // 21. 마법사의 신비로운 물약병
+                // 연금술 병 실루엣
+                ctx.beginPath(); ctx.arc(300, 270, 70, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.rect(285, 150, 30, 50); ctx.stroke();
+                break;
+
+            case 22: // 22. 도토리 도서관의 책꽂이
+                // 고풍스러운 책장 아치
+                ctx.beginPath(); ctx.moveTo(170, 120); ctx.quadraticCurveTo(300, 90, 430, 120); ctx.lineTo(430, 380); ctx.lineTo(170, 380); ctx.closePath(); ctx.stroke();
+                break;
+
+            case 23: // 23. 빙하 미끄럼틀의 펭귄들
+                // 부드러운 유선형 빙하 슬로프
+                ctx.beginPath(); ctx.moveTo(160, 180); ctx.quadraticCurveTo(280, 240, 440, 360); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(160, 220); ctx.quadraticCurveTo(300, 280, 440, 400); ctx.stroke();
+                break;
+
+            case 24: // 24. 바다 위를 나는 돌고래
+                // 곡선형 파도와 돌고래
+                ctx.beginPath(); ctx.moveTo(140, 320); ctx.quadraticCurveTo(300, 180, 460, 320); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(300, 240, 75, 35, -0.3, 0, Math.PI * 2); ctx.stroke();
+                break;
+
+            case 25: // 25. 로봇 친구와 꽃다발
+                // 동화 속 감성 로봇 윤곽
+                ctx.beginPath(); ctx.roundRect(240, 160, 120, 90, [20]); ctx.stroke();
+                ctx.beginPath(); ctx.roundRect(210, 265, 180, 110, [25]); ctx.stroke();
+                break;
+
+            case 26: // 26. 신비로운 유니콘의 호수
+                // 유니콘 실루엣 곡선
+                ctx.beginPath(); ctx.ellipse(270, 250, 85, 50, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(370, 180, 38, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(385, 145); ctx.lineTo(420, 90); ctx.lineTo(395, 140); ctx.closePath(); ctx.stroke();
+                break;
+
+            case 27: // 27. 노을 지는 하늘 열기구
+                // 물방울형 열기구 벌룬
+                ctx.beginPath(); ctx.arc(300, 190, 95, Math.PI * 0.8, Math.PI * 2.2, false); ctx.quadraticCurveTo(300, 310, 300, 310); ctx.closePath(); ctx.stroke();
+                break;
+
+            case 28: // 28. 정글 나무 위의 앵무새 가족
+                // 굵은 덩굴 나무 줄기
+                ctx.beginPath(); ctx.moveTo(280, 120); ctx.quadraticCurveTo(340, 240, 260, 380); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(330, 120); ctx.quadraticCurveTo(390, 240, 310, 380); ctx.stroke();
+                break;
+
+            case 29: // 29. 꼬마 기관차의 숲속 여행
+                // 동화풍 증기기관차 곡선
+                ctx.beginPath(); ctx.roundRect(180, 210, 150, 120, [15]); ctx.stroke();
+                ctx.beginPath(); ctx.roundRect(350, 230, 100, 100, [15]); ctx.stroke();
+                break;
+
+            case 30: // 30. 밤하늘 별자리 동화
+                // 별자리들을 잇는 우아한 곡선 라인
+                let prevX = 150, prevY = 200;
                 for(let i=0; i<6; i++) {
-                    let angle = (i * Math.PI) / 3;
-                    ctx.beginPath(); ctx.moveTo(300, 220); ctx.lineTo(300 + Math.cos(angle)*110, 220 + Math.sin(angle)*110); ctx.stroke();
-                }
-                break;
-
-            case 10: // 10. 캠핑 트레일러와 모닥불
-                ctx.strokeRect(180, 210, 180, 110);
-                ctx.beginPath(); ctx.arc(220, 320, 20, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(320, 320, 20, 0, Math.PI * 2); ctx.stroke();
-                // 모닥불
-                ctx.beginPath(); ctx.moveTo(440, 330); ctx.lineTo(460, 270); ctx.lineTo(480, 330); ctx.closePath(); ctx.stroke();
-                break;
-
-            case 11: // 11. 강아지 놀이터와 장난감
-                ctx.beginPath(); ctx.arc(230, 240, 45, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(195, 200, 15, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(265, 200, 15, 0, Math.PI * 2); ctx.stroke();
-                // 뼈다귀 장난감
-                ctx.beginPath(); ctx.rect(350, 260, 60, 25); ctx.stroke();
-                break;
-
-            case 12: // 12. 무지개 다리와 아기 구름
-                ctx.beginPath(); ctx.arc(300, 320, 150, Math.PI, 0, false); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 320, 120, Math.PI, 0, false); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 320, 90, Math.PI, 0, false); ctx.stroke();
-                break;
-
-            case 13: // 13. 보물섬과 해적선 돛
-                ctx.beginPath(); ctx.moveTo(150, 350); ctx.lineTo(450, 350); ctx.lineTo(400, 200); ctx.lineTo(200, 200); ctx.closePath(); ctx.stroke(); // 배 몸체
-                ctx.beginPath(); ctx.rect(295, 100, 10, 100); ctx.stroke(); // 돛대
-                ctx.beginPath(); ctx.moveTo(305, 110); ctx.quadraticCurveTo(360, 130, 305, 180); ctx.stroke(); // 돛
-                break;
-
-            case 14: // 14. 사파리의 사자와 얼룩말
-                ctx.beginPath(); ctx.arc(230, 230, 50, 0, Math.PI * 2); ctx.stroke(); // 사자 머리
-                for(let a=0; a<Math.PI*2; a+=Math.PI/5) {
-                    ctx.beginPath(); ctx.arc(230 + Math.cos(a)*55, 230 + Math.sin(a)*55, 18, 0, Math.PI*2); ctx.stroke();
-                }
-                ctx.beginPath(); ctx.arc(400, 240, 45, 0, Math.PI * 2); ctx.stroke(); // 얼룩말 머리
-                break;
-
-            case 15: // 15. 우아한 무도회 드레스
-                ctx.beginPath(); ctx.moveTo(270, 150); ctx.lineTo(330, 150); ctx.lineTo(370, 380); ctx.lineTo(230, 380); ctx.closePath(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(300, 130, 25, 0, Math.PI * 2); ctx.stroke();
-                break;
-
-            case 16: // 16. 대형 소방차와 사다리
-                ctx.strokeRect(150, 220, 240, 110);
-                ctx.beginPath(); ctx.arc(200, 330, 22, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(330, 330, 22, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.rect(170, 180, 200, 25); ctx.stroke(); // 사다리
-                break;
-
-            case 17: // 17. 나비와 화려한 장미 정원
-                // 장미꽃
-                for(let cx of [200, 300, 400]) {
-                    ctx.beginPath(); ctx.arc(cx, 280, 35, 0, Math.PI * 2); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(cx, 280, 20, 0, Math.PI * 2); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(cx, 280, 8, 0, Math.PI * 2); ctx.stroke();
-                }
-                break;
-
-            case 18: // 18. 눈사람과 겨울 스노우볼
-                ctx.beginPath(); ctx.arc(300, 250, 130, 0, Math.PI * 2); ctx.stroke(); // 스노우볼 구체
-                ctx.beginPath(); ctx.arc(300, 280, 45, 0, Math.PI * 2); ctx.stroke(); // 눈사람 몸
-                ctx.beginPath(); ctx.arc(300, 215, 30, 0, Math.PI * 2); ctx.stroke(); // 눈사람 머리
-                break;
-
-            case 19: // 19. 첨단 우주 정거장
-                ctx.strokeRect(220, 180, 160, 100);
-                ctx.strokeRect(130, 210, 80, 40); // 태양광 패널 좌
-                ctx.strokeRect(390, 210, 80, 40); // 태양광 패널 우
-                break;
-
-            case 20: // 20. 이탈리안 화덕 피자가게
-                ctx.beginPath(); ctx.arc(300, 260, 90, Math.PI, 0, false); ctx.stroke(); // 화덕
-                ctx.beginPath(); ctx.arc(300, 280, 50, Math.PI, 0, false); ctx.stroke(); // 입구
-                break;
-
-            case 21: // 21. 꼬마 마법사의 물약 실험
-                ctx.beginPath(); ctx.moveTo(270, 180); ctx.lineTo(330, 180); ctx.lineTo(350, 320); ctx.lineTo(250, 320); ctx.closePath(); ctx.stroke(); // 플라스크
-                ctx.beginPath(); ctx.rect(285, 140, 30, 40); ctx.stroke(); // 입구
-                break;
-
-            case 22: // 22. 숲속 도서관과 책꽂이
-                ctx.strokeRect(160, 140, 280, 240);
-                ctx.beginPath(); ctx.moveTo(160, 220); ctx.lineTo(440, 220); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(160, 300); ctx.lineTo(440, 300); ctx.stroke();
-                break;
-
-            case 23: // 23. 빙하와 슬라이딩 펭귄
-                ctx.beginPath(); ctx.ellipse(300, 300, 160, 60, 0, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.ellipse(250, 230, 35, 50, 0.3, 0, Math.PI * 2); ctx.stroke(); // 펭귄
-                break;
-
-            case 24: // 24. 파도를 넘는 돌고래
-                ctx.beginPath(); ctx.moveTo(150, 320); ctx.quadraticCurveTo(300, 150, 450, 320); ctx.stroke(); // 파도
-                ctx.beginPath(); ctx.ellipse(300, 220, 65, 30, -0.4, 0, Math.PI * 2); ctx.stroke(); // 돌고래
-                break;
-
-            case 25: // 25. 변신 로봇 전사
-                ctx.strokeRect(250, 160, 100, 90); // 머리
-                ctx.strokeRect(220, 260, 160, 110); // 몸통
-                ctx.beginPath(); ctx.arc(300, 210, 15, 0, Math.PI * 2); ctx.stroke(); // 눈
-                break;
-
-            case 26: // 26. 신비로운 유니콘과 무지개
-                ctx.beginPath(); ctx.ellipse(280, 240, 75, 45, 0, 0, Math.PI * 2); ctx.stroke(); // 몸체
-                ctx.beginPath(); ctx.arc(380, 180, 35, 0, Math.PI * 2); ctx.stroke(); // 머리
-                ctx.beginPath(); ctx.moveTo(395, 155); ctx.lineTo(420, 100); ctx.lineTo(385, 145); ctx.closePath(); ctx.stroke(); // 뿔
-                break;
-
-            case 27: // 27. 거대한 하늘 열기구
-                ctx.beginPath(); ctx.arc(300, 190, 85, 0, Math.PI * 2); ctx.stroke(); // 풍선
-                ctx.strokeRect(275, 310, 50, 45); // 바구니
-                ctx.beginPath(); ctx.moveTo(270, 265); ctx.lineTo(285, 310); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(330, 265); ctx.lineTo(315, 310); ctx.stroke();
-                break;
-
-            case 28: // 28. 밀림의 알록달록 앵무새
-                ctx.beginPath(); ctx.ellipse(280, 250, 50, 75, 0.3, 0, Math.PI * 2); ctx.stroke(); // 몸
-                ctx.beginPath(); ctx.arc(320, 170, 30, 0, Math.PI * 2); ctx.stroke(); // 머리
-                ctx.beginPath(); ctx.moveTo(340, 175); ctx.lineTo(380, 185); ctx.lineTo(345, 195); ctx.closePath(); ctx.stroke(); // 부리
-                break;
-
-            case 29: // 29. 증기기관차 기차여행
-                ctx.strokeRect(170, 210, 130, 110); // 기관차
-                ctx.strokeRect(320, 230, 110, 90);  // 객차
-                ctx.beginPath(); ctx.arc(205, 335, 20, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(265, 335, 20, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(375, 335, 20, 0, Math.PI * 2); ctx.stroke();
-                break;
-
-            case 30: // 30. 은하수와 별자리 지도
-                for(let i=0; i<12; i++) {
-                    let bx = 120 + (i * 35);
-                    let by = 150 + Math.sin(i) * 80;
-                    ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI * 2); ctx.stroke();
+                    let nx = 180 + i * 60;
+                    let ny = 160 + Math.sin(i * 1.2) * 90;
+                    ctx.beginPath(); ctx.arc(nx, ny, 8, 0, Math.PI * 2); ctx.stroke();
                     if(i > 0) {
-                        ctx.beginPath(); ctx.moveTo(bx-35, 150 + Math.sin(i-1)*80); ctx.lineTo(bx, by); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(prevX, prevY); ctx.lineTo(nx, ny); ctx.stroke();
                     }
+                    prevX = nx; prevY = ny;
                 }
                 break;
 
@@ -304,7 +272,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // 첫 번째 도안 기본 로드
-    drawAge7Sketch(1);
+    drawStorybookSketch(1);
 
     let isDrawing = false;
     let currentColor = "#FF0000";
