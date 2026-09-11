@@ -2,46 +2,76 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리 아이 쏙쏙 색칠놀이</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>동화책 감성 색칠놀이</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="app-container">
-        <h1>🎨 쏙쏙 색칠놀이 (만 5세 맞춤 도안)</h1>
-        
-        <!-- 상단 옵션 패널 (만 5세 수준 썸네일 밑그림 선택 & 질감 선택) -->
-        <div id="option-panel">
-            <div class="option-section">
-                <span class="option-title">🖼️ 밑그림을 골라보세요! (만 5세용)</span>
-                <div id="sketch-grid"></div>
+    <div class="app-container">
+        <header>
+            <h1>🎨 동화책 색칠놀이</h1>
+        </header>
+
+        <div class="main-content">
+            <!-- 캔버스 영역 -->
+            <div class="canvas-wrapper">
+                <canvas id="coloringCanvas" width="600" height="450"></canvas>
             </div>
-            <div class="option-section-row">
-                <label>✨ 색상 질감:</label>
-                <div id="texture-buttons">
-                    <button class="texture-btn active" data-texture="solid">기본</button>
-                    <button class="texture-btn" data-texture="crayon">크레파스</button>
-                    <button class="texture-btn" data-texture="watercolor">수채화</button>
-                    <button class="texture-btn" data-texture="glow">네온</button>
+
+            <!-- 도구 및 팔레트 패널 -->
+            <div class="control-panel">
+                <!-- 도구 선택 (기본 페인트 버킷 / 펜 숨김 토글) -->
+                <div class="control-group">
+                    <span class="control-label">도구 선택</span>
+                    <div class="btn-row">
+                        <button class="tool-btn active" data-tool="bucket">🪣 페인트 버킷</button>
+                        <button class="tool-btn" data-tool="toggle-pen">✏️ 펜 도구 보이기/숨기기</button>
+                    </div>
+                </div>
+
+                <!-- 숨겨진 펜 도구 (사인펜 / 색연필) -->
+                <div class="control-group pen-tools-container" id="penToolsContainer" style="display: none;">
+                    <span class="control-label">세부 드로잉 펜</span>
+                    <div class="btn-row">
+                        <button class="sub-tool-btn active" data-subtool="signpen">사인펜</button>
+                        <button class="sub-tool-btn" data-subtool="pencil">색연필</button>
+                    </div>
+                </div>
+
+                <!-- 색상 및 패턴 팔레트 (단색 + 그라데이션 + 특수 패턴) -->
+                <div class="control-group">
+                    <span class="control-label">색상 & 특수 패턴 선택</span>
+                    <div class="palette-tabs">
+                        <button class="p-tab active" data-tab="solid">기본 색상</button>
+                        <button class="p-tab" data-tab="gradient">그라데이션</button>
+                        <button class="p-tab" data-tab="pattern">특수 패턴</button>
+                    </div>
+                    
+                    <!-- 단색 팔레트 -->
+                    <div class="palette-content active" id="paletteSolid">
+                        <div class="color-palette" id="solidPalette"></div>
+                    </div>
+                    <!-- 그라데이션 팔레트 -->
+                    <div class="palette-content" id="paletteGradient" style="display: none;">
+                        <div class="pattern-palette" id="gradientPalette"></div>
+                    </div>
+                    <!-- 특수 패턴 팔레트 -->
+                    <div class="palette-content" id="palettePattern" style="display: none;">
+                        <div class="pattern-palette" id="patternPalette"></div>
+                    </div>
+                </div>
+
+                <!-- 초기화 버튼 -->
+                <div class="control-group">
+                    <button id="clearBtn" class="action-btn">전체 지우기</button>
                 </div>
             </div>
         </div>
 
-        <!-- 색칠공부 캔버스 -->
-        <canvas id="coloringCanvas"></canvas>
-
-        <div id="ui-container">
-            <!-- 도구 선택 버튼 영역 -->
-            <div id="tools">
-                <button class="tool-btn active" data-tool="pen">사인펜</button>
-                <button class="tool-btn" data-tool="colored-pencil">색연필</button>
-                <button class="tool-btn" data-tool="bucket">페인트 버킷</button>
-            </div>
-
-            <!-- 32컬러 팔레트 영역 -->
-            <div id="palette-container">
-                <div id="palette"></div>
-            </div>
+        <!-- 하단 밑그림 10선 선택 슬라이더 -->
+        <div class="sketch-selector">
+            <span class="control-label" style="margin-bottom: 4px; display: block;">밑그림 선택 (10선)</span>
+            <div class="sketch-grid" id="sketch-grid"></div>
         </div>
     </div>
 
