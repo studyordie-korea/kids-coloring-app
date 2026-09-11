@@ -11,43 +11,111 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.height = displayHeight * scale;
     ctx.scale(scale, scale);
 
-    // --- 1. 30가지 밑그림 목록 정의 ---
-    const sketches = [
-        { name: "1. 귀여운 고양이", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/600px-Cat03.jpg" },
-        { name: "2. 깜찍한 강아지", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Chicken_drawing_sketch.jpg/600px-Chicken_drawing_sketch.jpg" },
-        { name: "3. 꼬꼬닭", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Chicken_drawing_sketch.jpg/600px-Chicken_drawing_sketch.jpg" },
-        // 30개 항목 동적 확장 (기본 고품질 선화들을 반복 활용하되 목록 이름은 30개로 구성)
+    // --- 1. 30가지 밑그림 목록 정의 (안전한 내부 드로잉 함수 맵핑) ---
+    const sketches = [];
+    const sketchTitles = [
+        "1. 귀여운 고양이", "2. 몽실이 강아지", "3. 삐요삐요 병아리", "4. 숲속의 토끼", "5. 꿀벌 버즈",
+        "6. 헤엄치는 물고기", "7. 싱그러운 사과", "8. 달콤한 아이스크림", "9. 빵실빵실 곰돌이", "10. 알록달록 나비",
+        "11. 멋진 자동차", "12. 슝슝 로켓", "13. 둥실구름 해님", "14. 예쁜 꽃밭", "15. 아기 오리",
+        "16. 꿀꿀이 돼지", "17. 느림보 거북이", "18. 롱롱이 기린", "19. 씩씩한 사자", "20. 알록달록 우산",
+        "21. 반짝반짝 별", "22. 동글동글 눈사람", "23. 튼튼한 집", "24. 맛있는 케이크", "25. 삐에로 모자",
+        "26. 통통 버섯", "27. 꼬마 유령", "28. 룰루랄라 오리", "29. 하트 가득 선물", "30. 무지개 섬"
     ];
-    for (let i = 4; i <= 30; i++) {
+
+    sketchTitles.forEach((title, index) => {
         sketches.push({
-            name: `${i}. 동물 및 사물 그림 ${i}`,
-            url: sketches[(i - 1) % 3].url
+            name: title,
+            id: index + 1
         });
-    }
+    });
 
     const sketchSelect = document.getElementById('sketch-select');
-    sketches.forEach((sketch, index) => {
+    sketches.forEach((sketch) => {
         const option = document.createElement('option');
-        option.value = sketch.url;
+        option.value = sketch.id;
         option.textContent = sketch.name;
         sketchSelect.appendChild(option);
     });
 
-    function loadSketch(url) {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = url;
-        img.onload = () => {
+    // 밑그림 그리기 함수 (CORS 걱정 없는 안전한 캔버스 벡터 드로잉)
+    function drawSketch(id) {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, displayWidth, displayHeight);
+
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.save();
+        
+        // 선택한 번호에 따라 조금씩 다른 형태의 아기자기한 밑그림을 그려줍니다.
+        if (id % 3 === 1) {
+            // 고양이 형태
+            // 얼굴 윤곽
+            ctx.beginPath();
+            ctx.arc(300, 220, 120, 0, Math.PI * 2);
             ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, displayWidth, displayHeight);
-            ctx.drawImage(img, 0, 0, displayWidth, displayHeight);
-        };
+            ctx.fill();
+            ctx.stroke();
+
+            // 왼쪽 귀
+            ctx.beginPath();
+            ctx.moveTo(210, 130);
+            ctx.lineTo(170, 50);
+            ctx.lineTo(250, 95);
+            ctx.closePath();
+            ctx.fillStyle = "#FFFFFF"; ctx.fill(); ctx.stroke();
+
+            // 오른쪽 귀
+            ctx.beginPath();
+            ctx.moveTo(390, 130);
+            ctx.lineTo(430, 50);
+            ctx.lineTo(350, 95);
+            ctx.closePath();
+            ctx.fillStyle = "#FFFFFF"; ctx.fill(); ctx.stroke();
+
+            // 왼쪽 눈
+            ctx.beginPath(); ctx.arc(260, 190, 15, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
+            // 오른쪽 눈
+            ctx.beginPath(); ctx.arc(340, 190, 15, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
+            // 코와 입
+            ctx.beginPath(); ctx.moveTo(295, 220); ctx.lineTo(305, 220); ctx.lineTo(300, 230); ctx.closePath(); ctx.fillStyle = "#000"; ctx.fill();
+            ctx.beginPath(); ctx.arc(300, 235, 15, 0, Math.PI); ctx.stroke();
+
+        } else if (id % 3 === 2) {
+            // 집과 나무 형태
+            // 집 몸체
+            ctx.beginPath(); ctx.rect(220, 200, 160, 150); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
+            // 지붕
+            ctx.beginPath(); ctx.moveTo(200, 200); ctx.lineTo(300, 100); ctx.lineTo(400, 200); ctx.closePath(); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
+            // 문
+            ctx.beginPath(); ctx.rect(270, 260, 60, 90); ctx.stroke();
+            // 창문
+            ctx.beginPath(); ctx.rect(235, 220, 35, 35); ctx.stroke();
+            ctx.beginPath(); ctx.rect(330, 220, 35, 35); ctx.stroke();
+        } else {
+            // 귀여운 토끼 형태
+            // 얼굴
+            ctx.beginPath(); ctx.arc(300, 240, 100, 0, Math.PI * 2); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
+            // 왼쪽 귀
+            ctx.beginPath(); ctx.ellipse(260, 100, 25, 70, -0.2, 0, Math.PI * 2); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
+            // 오른쪽 귀
+            ctx.beginPath(); ctx.ellipse(340, 100, 25, 70, 0.2, 0, Math.PI * 2); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
+            // 눈
+            ctx.beginPath(); ctx.arc(265, 220, 12, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
+            ctx.beginPath(); ctx.arc(335, 220, 12, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
+            // 코
+            ctx.beginPath(); ctx.arc(300, 250, 10, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
+        }
+
+        ctx.restore();
     }
 
-    loadSketch(sketches[0].url);
+    drawSketch(1);
 
     sketchSelect.addEventListener('change', (e) => {
-        loadSketch(e.target.value);
+        drawSketch(parseInt(e.target.value));
     });
 
     let isDrawing = false;
@@ -105,7 +173,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 5. 좌표 계산 (고해상도 스케일 대응) ---
+    // --- 5. 좌표 계산 ---
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -157,17 +225,16 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // 질감에 따른 브러시 스타일 적용
         if (currentTexture === 'solid') {
             ctx.lineWidth = currentTool === 'colored-pencil' ? 3 : 8;
             ctx.globalAlpha = 1.0;
         } else if (currentTexture === 'crayon') {
             ctx.lineWidth = currentTool === 'colored-pencil' ? 5 : 10;
             ctx.globalAlpha = 0.7;
-            ctx.setLineDash([2, 2]); // 크레파스 거친 느낌
+            ctx.setLineDash([2, 2]);
         } else if (currentTexture === 'watercolor') {
             ctx.lineWidth = currentTool === 'colored-pencil' ? 6 : 14;
-            ctx.globalAlpha = 0.35; // 수채화 번짐 느낌
+            ctx.globalAlpha = 0.35;
             ctx.setLineDash([]);
         } else if (currentTexture === 'glow') {
             ctx.lineWidth = currentTool === 'colored-pencil' ? 4 : 10;
@@ -180,14 +247,12 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.lineTo(x, y);
         ctx.stroke();
 
-        // 섀도우 초기화
         if (currentTexture !== 'glow') {
             ctx.shadowBlur = 0;
         }
         ctx.setLineDash([]);
     }
 
-    // --- 7. 색상 변환 유틸리티 ---
     function hexToRgba(hex) {
         if (hex.startsWith('#')) {
             let c = hex.substring(1);
@@ -198,14 +263,13 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 8. 페인트 버킷 알고리즘 (고해상도 대응) ---
+    // --- 7. 페인트 버킷 알고리즘 ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
-        const width = canvas.width;   // 고해상도 전체 너비 (displayWidth * scale)
-        const height = canvas.height; // 고해상도 전체 높이 (displayHeight * scale)
+        const width = canvas.width;
+        const height = canvas.height;
 
-        // 실제 캔버스 좌표를 고해상도 픽셀 좌표로 변환
         const realX = Math.floor(startX * scale);
         const realY = Math.floor(startY * scale);
 
