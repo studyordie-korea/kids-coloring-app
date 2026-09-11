@@ -11,8 +11,7 @@ window.addEventListener('DOMContentLoaded', () => {
     canvas.height = displayHeight * scale;
     ctx.scale(scale, scale);
 
-    // --- 1. 30가지 밑그림 목록 정의 (안전한 내부 드로잉 함수 맵핑) ---
-    const sketches = [];
+    // --- 1. 30가지 정밀 밑그림 목록 정의 ---
     const sketchTitles = [
         "1. 귀여운 고양이", "2. 몽실이 강아지", "3. 삐요삐요 병아리", "4. 숲속의 토끼", "5. 꿀벌 버즈",
         "6. 헤엄치는 물고기", "7. 싱그러운 사과", "8. 달콤한 아이스크림", "9. 빵실빵실 곰돌이", "10. 알록달록 나비",
@@ -22,22 +21,15 @@ window.addEventListener('DOMContentLoaded', () => {
         "26. 통통 버섯", "27. 꼬마 유령", "28. 룰루랄라 오리", "29. 하트 가득 선물", "30. 무지개 섬"
     ];
 
-    sketchTitles.forEach((title, index) => {
-        sketches.push({
-            name: title,
-            id: index + 1
-        });
-    });
-
     const sketchSelect = document.getElementById('sketch-select');
-    sketches.forEach((sketch) => {
+    sketchTitles.forEach((title, index) => {
         const option = document.createElement('option');
-        option.value = sketch.id;
-        option.textContent = sketch.name;
+        option.value = index + 1;
+        option.textContent = title;
         sketchSelect.appendChild(option);
     });
 
-    // 밑그림 그리기 함수 (CORS 걱정 없는 안전한 캔버스 벡터 드로잉)
+    // --- 2. 30가지 개별 드로잉 함수 ---
     function drawSketch(id) {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, displayWidth, displayHeight);
@@ -48,65 +40,184 @@ window.addEventListener('DOMContentLoaded', () => {
         ctx.lineJoin = "round";
 
         ctx.save();
-        
-        // 선택한 번호에 따라 조금씩 다른 형태의 아기자기한 밑그림을 그려줍니다.
-        if (id % 3 === 1) {
-            // 고양이 형태
-            // 얼굴 윤곽
-            ctx.beginPath();
-            ctx.arc(300, 220, 120, 0, Math.PI * 2);
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fill();
-            ctx.stroke();
 
-            // 왼쪽 귀
-            ctx.beginPath();
-            ctx.moveTo(210, 130);
-            ctx.lineTo(170, 50);
-            ctx.lineTo(250, 95);
-            ctx.closePath();
-            ctx.fillStyle = "#FFFFFF"; ctx.fill(); ctx.stroke();
-
-            // 오른쪽 귀
-            ctx.beginPath();
-            ctx.moveTo(390, 130);
-            ctx.lineTo(430, 50);
-            ctx.lineTo(350, 95);
-            ctx.closePath();
-            ctx.fillStyle = "#FFFFFF"; ctx.fill(); ctx.stroke();
-
-            // 왼쪽 눈
-            ctx.beginPath(); ctx.arc(260, 190, 15, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
-            // 오른쪽 눈
-            ctx.beginPath(); ctx.arc(340, 190, 15, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
-            // 코와 입
-            ctx.beginPath(); ctx.moveTo(295, 220); ctx.lineTo(305, 220); ctx.lineTo(300, 230); ctx.closePath(); ctx.fillStyle = "#000"; ctx.fill();
-            ctx.beginPath(); ctx.arc(300, 235, 15, 0, Math.PI); ctx.stroke();
-
-        } else if (id % 3 === 2) {
-            // 집과 나무 형태
-            // 집 몸체
-            ctx.beginPath(); ctx.rect(220, 200, 160, 150); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
-            // 지붕
-            ctx.beginPath(); ctx.moveTo(200, 200); ctx.lineTo(300, 100); ctx.lineTo(400, 200); ctx.closePath(); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
-            // 문
-            ctx.beginPath(); ctx.rect(270, 260, 60, 90); ctx.stroke();
-            // 창문
-            ctx.beginPath(); ctx.rect(235, 220, 35, 35); ctx.stroke();
-            ctx.beginPath(); ctx.rect(330, 220, 35, 35); ctx.stroke();
-        } else {
-            // 귀여운 토끼 형태
-            // 얼굴
-            ctx.beginPath(); ctx.arc(300, 240, 100, 0, Math.PI * 2); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
-            // 왼쪽 귀
-            ctx.beginPath(); ctx.ellipse(260, 100, 25, 70, -0.2, 0, Math.PI * 2); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
-            // 오른쪽 귀
-            ctx.beginPath(); ctx.ellipse(340, 100, 25, 70, 0.2, 0, Math.PI * 2); ctx.fillStyle = "#FFF"; ctx.fill(); ctx.stroke();
-            // 눈
-            ctx.beginPath(); ctx.arc(265, 220, 12, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
-            ctx.beginPath(); ctx.arc(335, 220, 12, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
-            // 코
-            ctx.beginPath(); ctx.arc(300, 250, 10, 0, Math.PI * 2); ctx.fillStyle = "#000"; ctx.fill();
+        switch (id) {
+            case 1: // 고양이
+                ctx.beginPath(); ctx.arc(300, 220, 100, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(220, 140); ctx.lineTo(180, 70); ctx.lineTo(250, 110); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(380, 140); ctx.lineTo(420, 70); ctx.lineTo(350, 110); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(265, 190, 12, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(335, 190, 12, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.moveTo(295, 220); ctx.lineTo(305, 220); ctx.lineTo(300, 230); ctx.closePath(); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(300, 235, 15, 0, Math.PI); ctx.stroke();
+                break;
+            case 2: // 강아지
+                ctx.beginPath(); ctx.arc(300, 230, 95, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(205, 210, 25, 55, 0.3, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(395, 210, 25, 55, -0.3, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(265, 200, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(335, 200, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(300, 230, 18, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                break;
+            case 3: // 병아리
+                ctx.beginPath(); ctx.arc(300, 250, 70, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 160, 50, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(280, 150, 8, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(320, 150, 8, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.moveTo(290, 170); ctx.lineTo(310, 170); ctx.lineTo(300, 190); ctx.closePath(); ctx.stroke();
+                break;
+            case 4: // 토끼
+                ctx.beginPath(); ctx.arc(300, 250, 90, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(265, 110, 20, 75, -0.1, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(335, 110, 20, 75, 0.1, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(265, 230, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(335, 230, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                break;
+            case 5: // 꿀벌
+                ctx.beginPath(); ctx.ellipse(300, 220, 60, 85, Math.PI/2, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(230, 220, 35, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(280, 140, 25, 45, -0.4, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(330, 140, 25, 45, 0.4, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 6: // 물고기
+                ctx.beginPath(); ctx.ellipse(300, 225, 90, 60, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(390, 225); ctx.lineTo(450, 175); ctx.lineTo(450, 275); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(250, 210, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                break;
+            case 7: // 사과
+                ctx.beginPath(); ctx.arc(300, 240, 85, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(300, 155); ctx.quadraticCurveTo(340, 110, 320, 90); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(335, 105, 20, 10, 0.5, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 8: // 아이스크림
+                ctx.beginPath(); ctx.moveTo(300, 360); ctx.lineTo(240, 210); ctx.lineTo(360, 210); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 200, 75, Math.PI, Math.PI * 2); ctx.stroke();
+                break;
+            case 9: // 곰돌이
+                ctx.beginPath(); ctx.arc(300, 230, 95, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(220, 140, 30, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(380, 140, 30, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(260, 210, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.arc(340, 210, 10, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                break;
+            case 10: // 나비
+                ctx.beginPath(); ctx.ellipse(300, 225, 12, 70, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(230, 180, 55, 75, -0.5, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(370, 180, 55, 75, 0.5, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(240, 280, 45, 55, 0.5, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(360, 280, 45, 55, -0.5, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 11: // 자동차
+                ctx.beginPath(); ctx.rect(200, 230, 200, 75); ctx.stroke();
+                ctx.beginPath(); ctx.arc(245, 305, 30, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(355, 305, 30, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(230, 230); ctx.lineTo(265, 175); ctx.lineTo(335, 175); ctx.lineTo(370, 230); ctx.closePath(); ctx.stroke();
+                break;
+            case 12: // 로켓
+                ctx.beginPath(); ctx.moveTo(300, 100); ctx.lineTo(360, 240); ctx.lineTo(340, 330); ctx.lineTo(260, 330); ctx.lineTo(240, 240); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 220, 25, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 13: // 해님
+                ctx.beginPath(); ctx.arc(300, 225, 65, 0, Math.PI * 2); ctx.stroke();
+                for(let i=0; i<8; i++) {
+                    let angle = (i * Math.PI) / 4;
+                    let x1 = 300 + Math.cos(angle) * 85;
+                    let y1 = 225 + Math.sin(angle) * 85;
+                    let x2 = 300 + Math.cos(angle) * 115;
+                    let y2 = 225 + Math.sin(angle) * 115;
+                    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                }
+                break;
+            case 14: // 꽃밭
+                ctx.beginPath(); ctx.arc(300, 175, 35, 0, Math.PI * 2); ctx.stroke();
+                for(let i=0; i<6; i++) {
+                    let angle = (i * Math.PI) / 3;
+                    let cx = 300 + Math.cos(angle) * 40;
+                    let cy = 175 + Math.sin(angle) * 40;
+                    ctx.beginPath(); ctx.arc(cx, cy, 25, 0, Math.PI * 2); ctx.stroke();
+                }
+                ctx.beginPath(); ctx.moveTo(300, 210); ctx.lineTo(300, 350); ctx.stroke();
+                break;
+            case 15: // 아기 오리
+                ctx.beginPath(); ctx.arc(300, 250, 60, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(350, 180, 40, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(360, 175, 6, 0, Math.PI * 2); ctx.fillStyle="#000"; ctx.fill();
+                ctx.beginPath(); ctx.moveTo(390, 180); ctx.lineTo(420, 175); ctx.lineTo(390, 190); ctx.closePath(); ctx.stroke();
+                break;
+            case 16: // 돼지
+                ctx.beginPath(); ctx.arc(300, 225, 85, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(300, 240, 30, 20, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(250, 155, 20, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(350, 155, 20, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 17: // 거북이
+                ctx.beginPath(); ctx.ellipse(300, 225, 85, 65, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(400, 225, 30, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 18: // 기린
+                ctx.beginPath(); ctx.rect(275, 175, 50, 175); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 140, 45, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 19: // 사자
+                ctx.beginPath(); ctx.arc(300, 225, 105, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 225, 65, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 20: // 우산
+                ctx.beginPath(); ctx.arc(300, 200, 95, Math.PI, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(300, 200); ctx.lineTo(300, 340); ctx.stroke();
+                ctx.beginPath(); ctx.arc(285, 340, 15, 0, Math.PI); ctx.stroke();
+                break;
+            case 21: // 별
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    let angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                    let x = 300 + Math.cos(angle) * 85;
+                    let y = 225 + Math.sin(angle) * 85;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath(); ctx.stroke();
+                break;
+            case 22: // 눈사람
+                ctx.beginPath(); ctx.arc(300, 275, 75, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 160, 50, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 23: // 집
+                ctx.beginPath(); ctx.rect(220, 200, 160, 150); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(200, 200); ctx.lineTo(300, 100); ctx.lineTo(400, 200); ctx.closePath(); ctx.stroke();
+                ctx.beginPath(); ctx.rect(270, 260, 60, 90); ctx.stroke();
+                break;
+            case 24: // 케이크
+                ctx.beginPath(); ctx.rect(220, 230, 160, 110); ctx.stroke();
+                ctx.beginPath(); ctx.rect(250, 160, 100, 70); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(300, 160); ctx.lineTo(300, 120); ctx.stroke();
+                break;
+            case 25: // 모자
+                ctx.beginPath(); ctx.ellipse(300, 300, 110, 25, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(215, 290); ctx.lineTo(260, 130); ctx.lineTo(340, 130); ctx.lineTo(385, 290); ctx.closePath(); ctx.stroke();
+                break;
+            case 26: // 버섯
+                ctx.beginPath(); ctx.arc(300, 190, 85, Math.PI, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.rect(270, 190, 60, 130); ctx.stroke();
+                break;
+            case 27: // 유령
+                ctx.beginPath(); ctx.arc(300, 190, 75, Math.PI, Math.PI * 2);
+                ctx.lineTo(375, 330); ctx.lineTo(350, 310); ctx.lineTo(325, 330); ctx.lineTo(300, 310); ctx.lineTo(275, 330); ctx.lineTo(250, 310); ctx.lineTo(225, 330);
+                ctx.closePath(); ctx.stroke();
+                break;
+            case 28: // 오리
+                ctx.beginPath(); ctx.ellipse(300, 250, 75, 55, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(350, 170, 35, 0, Math.PI * 2); ctx.stroke();
+                break;
+            case 29: // 선물
+                ctx.beginPath(); ctx.rect(225, 200, 150, 150); ctx.stroke();
+                ctx.beginPath(); ctx.rect(210, 175, 180, 30); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(300, 350); ctx.lineTo(300, 200); ctx.stroke();
+                break;
+            case 30: // 무지개 섬
+                ctx.beginPath(); ctx.arc(300, 280, 110, Math.PI, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 280, 85, Math.PI, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 280, 60, Math.PI, Math.PI * 2); ctx.stroke();
+                break;
         }
 
         ctx.restore();
@@ -125,7 +236,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     canvas.className = "tool-pen";
 
-    // --- 2. 32 컬러 팔레트 생성 ---
+    // --- 3. 32 컬러 팔레트 생성 ---
     const paletteEl = document.getElementById('palette');
     const colors = [
         "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF", 
@@ -148,7 +259,7 @@ window.addEventListener('DOMContentLoaded', () => {
         paletteEl.appendChild(chip);
     });
 
-    // --- 3. 질감(Texture) 선택 설정 ---
+    // --- 4. 질감(Texture) 선택 설정 ---
     const textureButtons = document.querySelectorAll('.texture-btn');
     textureButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -158,7 +269,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 4. 도구 선택 및 커서 변경 ---
+    // --- 5. 도구 선택 및 커서 변경 ---
     const toolButtons = document.querySelectorAll('.tool-btn');
     toolButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -173,7 +284,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 5. 좌표 계산 ---
+    // --- 6. 좌표 계산 ---
     function getPosition(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -184,7 +295,7 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 6. 이벤트 핸들러 ---
+    // --- 7. 이벤트 핸들러 ---
     canvas.addEventListener('mousedown', handleActionStart);
     canvas.addEventListener('touchstart', (e) => { handleActionStart(e); e.preventDefault(); });
 
@@ -263,7 +374,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return [255, 0, 0, 255];
     }
 
-    // --- 7. 페인트 버킷 알고리즘 ---
+    // --- 8. 페인트 버킷 알고리즘 ---
     function floodFill(startX, startY, fillColorHex) {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
