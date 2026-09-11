@@ -10,11 +10,23 @@
     <div id="app-container">
         <h1>🎨 쏙쏙 색칠놀이</h1>
         
-        <!-- 밑그림 선택 30종 캐러셀/그리드 바 -->
-        <div id="template-container">
-            <div id="template-list"></div>
+        <!-- 상단 옵션 패널 (밑그림 선택 & 질감 선택) -->
+        <div id="option-panel">
+            <div class="option-group">
+                <label for="sketch-select">🖼️ 밑그림 선택:</label>
+                <select id="sketch-select"></select>
+            </div>
+            <div class="option-group">
+                <label>✨ 색상 질감:</label>
+                <div id="texture-buttons">
+                    <button class="texture-btn active" data-texture="solid">기본</button>
+                    <button class="texture-btn" data-texture="crayon">크레파스</button>
+                    <button class="texture-btn" data-texture="watercolor">수채화</button>
+                    <button class="texture-btn" data-texture="glow">네온</button>
+                </div>
+            </div>
         </div>
-        
+
         <!-- 색칠공부 캔버스 -->
         <canvas id="coloringCanvas"></canvas>
 
@@ -24,15 +36,6 @@
                 <button class="tool-btn active" data-tool="pen">사인펜</button>
                 <button class="tool-btn" data-tool="colored-pencil">색연필</button>
                 <button class="tool-btn" data-tool="bucket">페인트 버킷</button>
-            </div>
-
-            <!-- 페인트 버킷 전용 배경 패턴(질감) 선택 영역 -->
-            <div id="pattern-selector">
-                <span style="font-weight:bold; font-size:14px; color:#555;">버킷 패턴:</span>
-                <button class="pattern-btn active" data-pattern="solid">단색</button>
-                <button class="pattern-btn" data-pattern="stripe">줄무늬</button>
-                <button class="pattern-btn" data-pattern="dot">도트</button>
-                <button class="pattern-btn" data-pattern="grid">격자</button>
             </div>
 
             <!-- 32컬러 팔레트 영역 -->
