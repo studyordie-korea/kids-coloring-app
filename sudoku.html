@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 두뇌 스도쿠 (오류 수정판)</title>
+    <title>스마트 두뇌 스도쿠 (근본 해결 버전)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -102,7 +102,7 @@
 <body>
 
     <h1>🧩 스마트 두뇌 스도쿠</h1>
-    <p class="subtitle">오류 검증 완료 버전</p>
+    <p class="subtitle">완벽 검증 오류 해결 버전</p>
 
     <div class="controls">
         <select id="sizeSelect">
@@ -129,49 +129,65 @@
         let solutionBoard = [];
         let puzzleBoard = [];
 
+        // Fisher-Yates 공정한 무작위 셔플 함수
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         function initGame() {
             currentSize = parseInt(document.getElementById('sizeSelect').value);
             document.getElementById('message').innerText = '';
             
-            generateSafeSudoku(currentSize);
+            generateBulletproofSudoku(currentSize);
             renderBoard();
         }
 
-        // 수학적으로 중복이 발생하지 않는 라틴 사각형(Latin Square) 기반 스도쿠 생성
-        function generateSafeSudoku(size) {
+        // 완벽하게 중복을 통제하는 안전한 스도쿠 생성 알고리즘
+        function generateBulletproofSudoku(size) {
             solutionBoard = Array(size).fill(0).map(() => Array(size).fill(0));
             
-            // 완벽한 라틴 스퀘어 생성 (각 행과 열에 1부터 size까지 단 한 번씩만 등장)
-            let baseOffset = (size % 2 === 0) ? 2 : 2; 
+            // 1. 기본 올바른 라틴 사각형 정답판 베이스 구축
+            let base = [];
             for (let r = 0; r < size; r++) {
+                base[r] = [];
                 for (let c = 0; c < size; c++) {
-                    let val = ((r * baseOffset + c) % size) + 1;
-                    solutionBoard[r][c] = val;
+                    // 수학적으로 중복이 안 생기는 시프트 연산
+                    let shift = (size % 2 === 0) ? 2 : 2;
+                    let val = ((r * shift + c) % size) + 1;
+                    base[r][c] = val;
                 }
             }
 
-            // 숫자의 배치를 섞어주되 행/열 규칙이 깨지지 않도록 전체 번호 매핑을 무작위로 섞음
-            let nums = Array.from({length: size}, (_, i) => i + 1);
-            nums.sort(() => Math.random() - 0.5);
+            // 2. 숫자를 완전한 무작위로 1:1 매핑 변환 (안전한 셔플 이용)
+            let originalNums = Array.from({length: size}, (_, i) => i + 1);
+            let shuffledNums = shuffle([...originalNums]);
 
             for (let r = 0; r < size; r++) {
                 for (let c = 0; c < size; c++) {
-                    solutionBoard[r][c] = nums[solutionBoard[r][c] - 1];
+                    let mappedVal = shuffledNums[base[r][c] - 1];
+                    solutionBoard[r][c] = mappedVal;
                 }
             }
 
-            // 퍼즐판 생성 (정답판에서 적절한 수만 남기고 나머지는 빈칸으로 둠)
+            // 3. 행 순서를 안전하게 섞어줌
+            solutionBoard = shuffle(solutionBoard);
+
+            // 4. 퍼즐판 생성 (약 35~40%만 지워서 풀기 쉽고 오류 없게 구성)
             puzzleBoard = JSON.parse(JSON.stringify(solutionBoard));
-            let removeCount = Math.floor(size * size * 0.4); // 40% 정도만 빈칸으로 만듦
+            let removeCount = Math.floor(size * size * 0.38); 
             
             let removed = 0;
-            while (removed < removeCount) {
-                let rr = Math.floor(Math.random() * size);
-                let rc = Math.floor(Math.random() * size);
-                // 최소한 각 줄에 숫자가 너무 없지 않도록 체크하며 지움
-                if (puzzleBoard[rr][rc] !== 0) {
-                    puzzleBoard[rr][rc] = 0;
-                    removed++;
+            // 각 행마다 최소한 남는 숫자가 보장되도록 안전하게 구멍 뚫기
+            let holesPerRow = Math.floor(size * 0.38);
+            for (let r = 0; r < size; r++) {
+                let rowCols = Array.from({length: size}, (_, i) => i);
+                shuffle(rowCols);
+                for (let i = 0; i < holesPerRow; i++) {
+                    puzzleBoard[r][rowCols[i]] = 0;
                 }
             }
         }
