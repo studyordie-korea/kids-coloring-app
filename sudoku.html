@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 딸을 위한 스도쿠 퍼즐</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        select, button {
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button:active {
+            background-color: #45a049;
+        }
+        #board-container {
+            overflow: auto;
+            max-width: 100%;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        td {
+            border: 1px solid #999;
+            width: 35px;
+            height: 35px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+        input.sudoku-cell {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: transparent;
+            box-sizing: border-box;
+        }
+        input.sudoku-cell:focus {
+            outline: 2px solid #2196F3;
+            background-color: #e3f2fd;
+        }
+        .fixed-cell {
+            background-color: #e0e0e0;
+            color: #000;
+        }
+        .message {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ff5722;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🧩 우리 딸을 위한 맞춤 스도쿠</h1>
+
+    <div class="controls">
+        <select id="sizeSelect">
+            <option value="4">4 x 4</option>
+            <option value="5">5 x 5</option>
+            <option value="6">6 x 6</option>
+            <option value="7">7 x 7</option>
+            <option value="8">8 x 8</option>
+            <option value="9" selected>9 x 9 (기본)</option>
+            <option value="10">10 x 10</option>
+        </select>
+        <button onclick="generateSudoku()">새 게임</button>
+        <button onclick="checkSudoku()">정답 확인</button>
+    </div>
+
+    <div id="board-container">
+        <div id="sudoku-board"></div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <script>
+        function generateSudoku() {
+            const size = parseInt(document.getElementById('sizeSelect').value);
+            const container = document.getElementById('sudoku-board');
+            document.getElementById('message').innerText = '';
+            
+            let html = '<table>';
+            for (let r = 0; r < size; r++) {
+                html += '<tr>';
+                for (let c = 0; c < size; c++) {
+                    // 간단한 예시용 초기값 배치 (일부러 빈칸과 숫자를 섞어둡니다)
+                    let val = '';
+                    let isFixed = false;
+                    
+                    // 대략 30% ~ 40% 확률로 숫자를 미리 채워줌 (간단한 데모용 로직)
+                    if ((r * 3 + c * 7) % 5 === 0) {
+                        val = ((r + c) % size) + 1;
+                        isFixed = true;
+                    }
+
+                    if (isFixed) {
+                        html += `<td><input type="number" class="sudoku-cell fixed-cell" value="${val}" readonly></td>`;
+                    } else {
+                        html += `<td><input type="number" class="sudoku-cell" min="1" max="${size}" placeholder=""></td>`;
+                    }
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        function checkSudoku() {
+            const size = parseInt(document.getElementById('sizeSelect').value);
+            const inputs = document.querySelectorAll('.sudoku-cell');
+            let complete = true;
+
+            inputs.forEach(input => {
+                if (!input.value) {
+                    complete = false;
+                }
+            });
+
+            const msg = document.getElementById('message');
+            if (complete) {
+                msg.style.color = '#4CAF50';
+                msg.innerText = '🎉 멋지네요! 모든 칸을 채우셨습니다!';
+            } else {
+                msg.style.color = '#ff5722';
+                msg.innerText = '아직 비어있는 칸이 있어요. 힘내세요!';
+            }
+        }
+
+        // 페이지 로드 시 기본 9x9 실행
+        window.onload = generateSudoku;
+    </script>
+</body>
+</html>
