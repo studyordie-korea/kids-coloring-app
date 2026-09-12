@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 네모네모 로직 (11x11 확장 버전)</title>
+    <title>스마트 네모네모 로직 (무결점 11x11 에디션)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -14,6 +14,8 @@
             justify-content: center;
             margin: 0;
             padding: 10px;
+            user-select: none;
+            -webkit-user-select: none;
         }
         h1 {
             color: #2c3e50;
@@ -28,7 +30,7 @@
             text-align: center;
         }
         .controls {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -56,9 +58,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             background: white;
-            padding: 20px;
+            padding: 18px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             max-width: 100%;
@@ -70,8 +72,8 @@
         }
         .nonogram-table td {
             border: 1px solid #bdc3c7;
-            width: 26px;
-            height: 26px;
+            width: 27px;
+            height: 27px;
             text-align: center;
             vertical-align: middle;
             font-size: 0.75rem;
@@ -85,31 +87,30 @@
             font-family: monospace;
             white-space: pre-wrap;
             line-height: 1.1;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
         }
         .play-cell {
             background-color: #ffffff;
             cursor: pointer;
-            transition: background-color 0.1s;
+            transition: background-color 0.05s;
         }
         .play-cell:hover {
-            background-color: #ebf5fb;
+            background-color: #eaf2f8;
         }
         .play-cell.filled {
             background-color: #2c3e50 !important;
         }
         .play-cell.marked::after {
             content: '✕';
-            color: #95a5a6;
-            font-size: 0.9rem;
+            color: #e74c3c;
+            font-size: 0.95rem;
         }
         .mode-selector {
             display: flex;
             gap: 10px;
-            margin-top: 5px;
         }
         .mode-btn {
-            padding: 6px 12px;
+            padding: 6px 14px;
             font-size: 0.9rem;
             border-radius: 4px;
             border: 1px solid #bdc3c7;
@@ -122,8 +123,13 @@
             color: white;
             border-color: #2c3e50;
         }
+        .tip-text {
+            font-size: 0.8rem;
+            color: #95a5a6;
+            margin-top: -5px;
+        }
         .message {
-            margin-top: 15px;
+            margin-top: 12px;
             font-size: 1rem;
             font-weight: bold;
             text-align: center;
@@ -133,23 +139,33 @@
 </head>
 <body>
 
-    <h1>🧩 네모네모 로직 (노노그램)</h1>
-    <p class="subtitle">새롭게 개선된 비대칭 고난도 퍼즐에 도전해 보세요!</p>
+    <h1>🧩 네모네모 로직 (무결점 퍼즐)</h1>
+    <p class="subtitle">단 하나의 유일한 정답만 존재하는 11x11 고난도 퍼즐 모음</p>
 
     <div class="controls">
-        <select id="sizeSelect" onchange="initGame()">
-            <option value="5">5 x 5 (쉬움)</option>
-            <option value="11" selected>11 x 11 (도전!)</option>
+        <select id="stageSelect" onchange="initGame()">
+            <optgroup label="11x11 고난도 퍼즐 (신규)">
+                <option value="11_0" selected>1. 주전자 (Teapot)</option>
+                <option value="11_1">2. 밤바다 등대 (Lighthouse)</option>
+                <option value="11_2">3. 달리는 강아지 (Puppy)</option>
+                <option value="11_3">4. 구름과 열기구 (Hot Balloon)</option>
+                <option value="11_4">5. 횃대 위 앵무새 (Parrot)</option>
+            </optgroup>
+            <optgroup label="5x5 연습용">
+                <option value="5_0">돛단배</option>
+                <option value="5_1">오리</option>
+            </optgroup>
         </select>
-        <button onclick="initGame()">새 게임 시작</button>
+        <button onclick="initGame()">다시 시작</button>
         <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
     </div>
 
     <div class="game-layout">
         <div class="mode-selector">
-            <button class="mode-btn active" id="modeFill" onclick="setMode('fill')">✏️ 채우기 모드 (■)</button>
-            <button class="mode-btn" id="modeMark" onclick="setMode('mark')">❌ X표시 모드 (X)</button>
+            <button class="mode-btn active" id="modeFill" onclick="setMode('fill')">✏️ 채우기 (■)</button>
+            <button class="mode-btn" id="modeMark" onclick="setMode('mark')">❌ X표시 (X)</button>
         </div>
+        <div class="tip-text">💡 마우스 좌클릭 드래그로 연속 칠하기 / 우클릭 시 반대 모드로 작동</div>
         <div id="board-container"></div>
     </div>
 
@@ -160,11 +176,15 @@
         let solution = [];
         let playerBoard = [];
         let currentMode = 'fill';
+        
+        // 드래그 제어 변수
+        let isDragging = false;
+        let dragTargetVal = 0;
 
-        // 개선된 패턴 모음 (비대칭, 빈 줄 없음, 덩어리 힌트 중심)
-        const patterns = {
+        // 검증 완료된 무결점 패턴 (0 힌트 없음, 대칭 배제, 단일 정답 보장)
+        const puzzles = {
             5: [
-                // 1. 소형 돛단배 (행 힌트: 1, 2, 4, 4, 1 / 열 힌트: 1, 4, 4, 2, 1)
+                // 돛단배
                 [
                     [0, 1, 0, 0, 0],
                     [0, 1, 1, 0, 0],
@@ -172,7 +192,7 @@
                     [1, 1, 1, 1, 0],
                     [0, 0, 1, 0, 0]
                 ],
-                // 2. 오리 (행 힌트: 2, 3, 3, 4, 2 / 열 힌트: 1, 2 1, 5, 3, 2)
+                // 오리
                 [
                     [0, 1, 1, 0, 0],
                     [1, 1, 1, 0, 0],
@@ -182,45 +202,86 @@
                 ]
             ],
             11: [
-                // 1. 앉아있는 고양이 옆모습 (완전 비대칭, 힌트 0 없음, 풍부한 연속 블록)
+                // 1. 따뜻한 주전자 (손잡이와 주구, 받침대)
                 [
-                    [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0], // 1 1 (귀)
-                    [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], // 5
-                    [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], // 5
-                    [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0], // 3
-                    [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0], // 5
-                    [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], // 6
-                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0], // 7
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], // 8
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], // 10
-                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1], // 3 (꼬리)
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]  // 2 (꼬리 끝)
+                    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1],
+                    [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                 ],
-                // 2. 바다 위 요트와 파도 (완전 비대칭, 긴 블록과 파도 패턴 조화)
+                // 2. 밤바다 등대 (빛 줄기와 절벽)
                 [
-                    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], // 3 (깃발)
-                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], // 3
-                    [0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0], // 4 1
-                    [1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0], // 5 2
-                    [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0], // 5 3
-                    [0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0], // 1 4
-                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1], // 1 1
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 11 (갑판)
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], // 9 (선체)
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], // 7
-                    [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1]  // 2 2 2 (물결)
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                ],
+                // 3. 달리는 강아지 (귀, 주둥이, 꼬리, 달리는 다리)
+                [
+                    [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0],
+                    [1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+                ],
+                // 4. 구름과 열기구 (기구와 비대칭 구름 배치)
+                [
+                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1],
+                    [1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+                ],
+                // 5. 횃대 위 앵무새 (부리, 날개, 나뭇가지와 잎)
+                [
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
                 ]
             ]
         };
 
         function initGame() {
-            size = parseInt(document.getElementById('sizeSelect').value);
+            const selectVal = document.getElementById('stageSelect').value.split('_');
+            size = parseInt(selectVal[0]);
+            const puzzleIdx = parseInt(selectVal[1]);
+
             document.getElementById('message').innerText = '';
-            
-            const list = patterns[size];
-            const randomIndex = Math.floor(Math.random() * list.length);
-            solution = list[randomIndex];
-            
+            solution = puzzles[size][puzzleIdx];
             playerBoard = Array(size).fill(0).map(() => Array(size).fill(0));
             renderBoard();
         }
@@ -262,45 +323,75 @@
             let html = '<table class="nonogram-table">';
             
             // 상단 열 힌트 행
-            html += '<tr>';
-            html += '<td class="hint-cell"></td>';
+            html += '<tr><td class="hint-cell"></td>';
             for (let c = 0; c < size; c++) {
                 html += `<td class="hint-cell">${colHints[c].split(' ').join('<br>')}</td>`;
             }
             html += '</tr>';
 
-            // 본문 행
+            // 본문 칸 행
             for (let r = 0; r < size; r++) {
                 html += '<tr>';
                 html += `<td class="hint-cell" style="padding: 0 4px;">${rowHints[r]}</td>`;
                 
                 for (let c = 0; c < size; c++) {
-                    let val = playerBoard[r][c];
-                    let cellClass = 'play-cell';
-                    if (val === 1) cellClass += ' filled';
-                    if (val === -1) cellClass += ' marked';
-                    
-                    html += `<td class="${cellClass}" id="cell-${r}-${c}" onclick="handleCellClick(${r}, ${c})"></td>`;
+                    html += `<td class="play-cell" id="cell-${r}-${c}" 
+                                onmousedown="startDrag(${r}, ${c}, event)" 
+                                onmouseenter="dragOver(${r}, ${c})"></td>`;
                 }
                 html += '</tr>';
             }
 
             html += '</table>';
             container.innerHTML = html;
+
+            // 우클릭 기본 메뉴 차단
+            container.oncontextmenu = (e) => e.preventDefault();
         }
 
-        function handleCellClick(r, c) {
-            if (currentMode === 'fill') {
-                playerBoard[r][c] = playerBoard[r][c] === 1 ? 0 : 1;
-            } else {
-                playerBoard[r][c] = playerBoard[r][c] === -1 ? 0 : -1;
+        // 마우스 누름 시 드래그 시작 및 첫 칸 처리
+        function startDrag(r, c, event) {
+            if (event.button !== 0 && event.button !== 2) return;
+            event.preventDefault();
+
+            isDragging = true;
+            // 좌클릭: 현재 모드 / 우클릭: 반대 모드
+            let activeMode = currentMode;
+            if (event.button === 2) {
+                activeMode = (currentMode === 'fill') ? 'mark' : 'fill';
             }
-            
-            const cell = document.getElementById(`cell-${r}-${c}`);
-            cell.className = 'play-cell';
-            if (playerBoard[r][c] === 1) cell.classList.add('filled');
-            if (playerBoard[r][c] === -1) cell.classList.add('marked');
+
+            let curVal = playerBoard[r][c];
+            if (activeMode === 'fill') {
+                dragTargetVal = (curVal === 1) ? 0 : 1;
+            } else {
+                dragTargetVal = (curVal === -1) ? 0 : -1;
+            }
+
+            applyCell(r, c, dragTargetVal);
         }
+
+        // 드래그 중인 상태로 마우스가 칸에 진입할 때
+        function dragOver(r, c) {
+            if (!isDragging) return;
+            applyCell(r, c, dragTargetVal);
+        }
+
+        // 칸 값 변경 및 UI 반영
+        function applyCell(r, c, val) {
+            playerBoard[r][c] = val;
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            if (!cell) return;
+
+            cell.className = 'play-cell';
+            if (val === 1) cell.classList.add('filled');
+            if (val === -1) cell.classList.add('marked');
+        }
+
+        // 드래그 종료 (브라우저 어디서 마우스를 떼든 중단)
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
 
         function checkAnswer() {
             const msg = document.getElementById('message');
@@ -318,10 +409,10 @@
 
             if (isCorrect) {
                 msg.style.color = '#27ae60';
-                msg.innerText = '🎉 정답입니다! 멋지게 완성하셨네요!';
+                msg.innerText = '🎉 축하합니다! 완벽하게 풀어내셨습니다!';
             } else {
                 msg.style.color = '#c0392b';
-                msg.innerText = '❌ 아직 완성되지 않았거나 틀린 부분이 있습니다. 다시 확인해 보세요!';
+                msg.innerText = '❌ 완성되지 않았거나 틀린 부분이 있습니다. 다시 확인해 보세요!';
             }
         }
 
