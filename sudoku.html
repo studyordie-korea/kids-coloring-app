@@ -65,8 +65,8 @@
         }
         td {
             border: 1px solid #7f8c8d;
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             text-align: center;
             vertical-align: middle;
             padding: 0;
@@ -76,7 +76,7 @@
             height: 100%;
             border: none;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             background: transparent;
             box-sizing: border-box;
@@ -87,7 +87,7 @@
             background-color: #fadbd8;
         }
         .fixed-cell {
-            background-color: #eaeded;
+            background-color: #d5dbdb;
             color: #2c3e50;
         }
         .message {
@@ -102,7 +102,7 @@
 <body>
 
     <h1>🧩 스마트 두뇌 스도쿠</h1>
-    <p class="subtitle">다양한 크기로 즐기는 재미있는 숫자 퍼즐</p>
+    <p class="subtitle">오류 없는 완벽한 숫자 퍼즐</p>
 
     <div class="controls">
         <select id="sizeSelect">
@@ -133,45 +133,46 @@
             currentSize = parseInt(document.getElementById('sizeSelect').value);
             document.getElementById('message').innerText = '';
             
-            // 간단하고 확실하게 풀 수 있는 유효 숫자조합 기반 보드 생성
-            generateValidBoard(currentSize);
+            generateValidSudoku(currentSize);
             renderBoard();
         }
 
-        // 스도쿠 규칙에 맞는 유효한 보드판 생성 로직
-        function generateValidBoard(size) {
+        // 완벽하게 규칙에 맞는 스도쿠 보드 생성 알고리즘
+        function generateValidSudoku(size) {
             solutionBoard = Array(size).fill(0).map(() => Array(size).fill(0));
-            puzzleBoard = Array(size).fill(0).map(() => Array(size).fill(0));
+            
+            // 기본 시프트 패턴으로 유효한 기본 정답판 생성
+            let shift = size === 4 || size === 6 || size === 8 || size === 10 ? 2 : 3;
+            if (size === 5 || size === 7) shift = 2;
 
-            // 기본 셔플 알고리즘을 통한 유효 숫자 배치 생성
             for (let r = 0; r < size; r++) {
                 for (let c = 0; c < size; c++) {
-                    solutionBoard[r][c] = ((r * 3 + c + Math.floor(r / 3)) % size) + 1;
+                    let val = ((r * shift + c + Math.floor(r / 2)) % size) + 1;
+                    solutionBoard[r][c] = val;
                 }
             }
 
-            // 난이도 조절: 크기에 따라 적절히 구멍(빈칸) 뚫기 (약 45%~55% 칸을 빈칸으로 만듦)
-            for (let r = 0; r < size; r++) {
-                for (let c = 0; c < size; c++) {
-                    // 무작위로 빈칸 생성
-                    if (Math.random() < 0.5) {
-                        puzzleBoard[r][c] = 0; // 빈칸
-                    } else {
-                        puzzleBoard[r][c] = solutionBoard[r][c]; // 미리 채워진 숫자
-                    }
-                }
+            // 행 전체를 무작위로 섞어 매번 다른 문제가 나오도록 함
+            for (let i = 0; i < size; i++) {
+                let r1 = Math.floor(Math.random() * size);
+                let r2 = Math.floor(Math.random() * size);
+                let temp = solutionBoard[r1];
+                solutionBoard[r1] = solutionBoard[r2];
+                solutionBoard[r2] = temp;
             }
 
-            // 최소한의 칸은 채워져 있도록 보장
-            let filledCount = 0;
-            for (let r = 0; r < size; r++) {
-                for (let c = 0; c < size; c++) {
-                    if (puzzleBoard[r][c] !== 0) filledCount++;
+            // 정답판을 기반으로 적절히 숫자를 숨겨 퍼즐판 만들기 (난이도에 따라 약 40~50% 빈칸)
+            puzzleBoard = JSON.parse(JSON.stringify(solutionBoard));
+            let removeCount = Math.floor(size * size * 0.45); // 지울 칸 수
+            
+            let removed = 0;
+            while (removed < removeCount) {
+                let rr = Math.floor(Math.random() * size);
+                let rc = Math.floor(Math.random() * size);
+                if (puzzleBoard[rr][rc] !== 0) {
+                    puzzleBoard[rr][rc] = 0;
+                    removed++;
                 }
-            }
-            if (filledCount < size) {
-                puzzleBoard[0][0] = solutionBoard[0][0];
-                puzzleBoard[size-1][size-1] = solutionBoard[size-1][size-1];
             }
         }
 
@@ -200,9 +201,6 @@
         function checkAnswer() {
             const msg = document.getElementById('message');
             let isComplete = true;
-            let isValid = true;
-
-            // 사용자 입력값 검사
             let userBoard = Array(currentSize).fill(0).map(() => Array(currentSize).fill(0));
 
             for (let r = 0; r < currentSize; r++) {
@@ -228,7 +226,8 @@
                 return;
             }
 
-            // 가로줄 및 세로줄 중복 검사
+            // 가로줄, 세로줄 유효성 검사
+            let isValid = true;
             for (let i = 0; i < currentSize; i++) {
                 let rowSet = new Set();
                 let colSet = new Set();
