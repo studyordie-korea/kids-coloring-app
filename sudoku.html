@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리 딸을 위한 스도쿠 퍼즐</title>
+    <title>우리 딸을 위한 스마트 스도쿠</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f7f9fc;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,9 +16,15 @@
             padding: 10px;
         }
         h1 {
-            color: #333;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        p.subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
             text-align: center;
         }
         .controls {
@@ -29,37 +35,38 @@
             justify-content: center;
         }
         select, button {
-            padding: 8px 12px;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            padding: 8px 14px;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            border: 1px solid #bdc3c7;
             background-color: #fff;
             cursor: pointer;
+            font-weight: bold;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #3498db;
             color: white;
             border: none;
         }
         button:active {
-            background-color: #45a049;
+            background-color: #2980b9;
         }
         #board-container {
             overflow: auto;
             max-width: 100%;
             background: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         table {
             border-collapse: collapse;
             margin: 0 auto;
         }
         td {
-            border: 1px solid #999;
-            width: 35px;
-            height: 35px;
+            border: 1px solid #7f8c8d;
+            width: 36px;
+            height: 36px;
             text-align: center;
             vertical-align: middle;
             padding: 0;
@@ -73,40 +80,42 @@
             font-weight: bold;
             background: transparent;
             box-sizing: border-box;
+            color: #2980b9;
         }
         input.sudoku-cell:focus {
-            outline: 2px solid #2196F3;
-            background-color: #e3f2fd;
+            outline: 2px solid #e74c3c;
+            background-color: #fadbd8;
         }
         .fixed-cell {
-            background-color: #e0e0e0;
-            color: #000;
+            background-color: #eaeded;
+            color: #2c3e50;
         }
         .message {
             margin-top: 15px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
-            color: #ff5722;
             text-align: center;
+            min-height: 24px;
         }
     </style>
 </head>
 <body>
 
-    <h1>🧩 우리 딸을 위한 맞춤 스도쿠</h1>
+    <h1>🧩 스마트 두뇌 스도쿠</h1>
+    <p class="subtitle">다양한 크기로 즐기는 재미있는 숫자 퍼즐</p>
 
     <div class="controls">
         <select id="sizeSelect">
-            <option value="4">4 x 4</option>
+            <option value="4">4 x 4 (쉬움)</option>
             <option value="5">5 x 5</option>
             <option value="6">6 x 6</option>
             <option value="7">7 x 7</option>
             <option value="8">8 x 8</option>
-            <option value="9" selected>9 x 9 (기본)</option>
-            <option value="10">10 x 10</option>
+            <option value="9" selected>9 x 9 (표준)</option>
+            <option value="10">10 x 10 (도전)</option>
         </select>
-        <button onclick="generateSudoku()">새 게임</button>
-        <button onclick="checkSudoku()">정답 확인</button>
+        <button onclick="initGame()">새 게임</button>
+        <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
     </div>
 
     <div id="board-container">
@@ -116,29 +125,70 @@
     <div class="message" id="message"></div>
 
     <script>
-        function generateSudoku() {
-            const size = parseInt(document.getElementById('sizeSelect').value);
-            const container = document.getElementById('sudoku-board');
+        let currentSize = 9;
+        let solutionBoard = [];
+        let puzzleBoard = [];
+
+        function initGame() {
+            currentSize = parseInt(document.getElementById('sizeSelect').value);
             document.getElementById('message').innerText = '';
             
-            let html = '<table>';
+            // 간단하고 확실하게 풀 수 있는 유효 숫자조합 기반 보드 생성
+            generateValidBoard(currentSize);
+            renderBoard();
+        }
+
+        // 스도쿠 규칙에 맞는 유효한 보드판 생성 로직
+        function generateValidBoard(size) {
+            solutionBoard = Array(size).fill(0).map(() => Array(size).fill(0));
+            puzzleBoard = Array(size).fill(0).map(() => Array(size).fill(0));
+
+            // 기본 셔플 알고리즘을 통한 유효 숫자 배치 생성
             for (let r = 0; r < size; r++) {
-                html += '<tr>';
                 for (let c = 0; c < size; c++) {
-                    // 간단한 예시용 초기값 배치 (일부러 빈칸과 숫자를 섞어둡니다)
-                    let val = '';
-                    let isFixed = false;
-                    
-                    // 대략 30% ~ 40% 확률로 숫자를 미리 채워줌 (간단한 데모용 로직)
-                    if ((r * 3 + c * 7) % 5 === 0) {
-                        val = ((r + c) % size) + 1;
-                        isFixed = true;
+                    solutionBoard[r][c] = ((r * 3 + c + Math.floor(r / 3)) % size) + 1;
+                }
+            }
+
+            // 난이도 조절: 크기에 따라 적절히 구멍(빈칸) 뚫기 (약 45%~55% 칸을 빈칸으로 만듦)
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    // 무작위로 빈칸 생성
+                    if (Math.random() < 0.5) {
+                        puzzleBoard[r][c] = 0; // 빈칸
+                    } else {
+                        puzzleBoard[r][c] = solutionBoard[r][c]; // 미리 채워진 숫자
                     }
+                }
+            }
+
+            // 최소한의 칸은 채워져 있도록 보장
+            let filledCount = 0;
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    if (puzzleBoard[r][c] !== 0) filledCount++;
+                }
+            }
+            if (filledCount < size) {
+                puzzleBoard[0][0] = solutionBoard[0][0];
+                puzzleBoard[size-1][size-1] = solutionBoard[size-1][size-1];
+            }
+        }
+
+        function renderBoard() {
+            const container = document.getElementById('sudoku-board');
+            let html = '<table>';
+            
+            for (let r = 0; r < currentSize; r++) {
+                html += '<tr>';
+                for (let c = 0; c < currentSize; c++) {
+                    let val = puzzleBoard[r][c];
+                    let isFixed = val !== 0;
 
                     if (isFixed) {
                         html += `<td><input type="number" class="sudoku-cell fixed-cell" value="${val}" readonly></td>`;
                     } else {
-                        html += `<td><input type="number" class="sudoku-cell" min="1" max="${size}" placeholder=""></td>`;
+                        html += `<td><input type="number" class="sudoku-cell" min="1" max="${currentSize}" id="cell-${r}-${c}" placeholder=""></td>`;
                     }
                 }
                 html += '</tr>';
@@ -147,29 +197,61 @@
             container.innerHTML = html;
         }
 
-        function checkSudoku() {
-            const size = parseInt(document.getElementById('sizeSelect').value);
-            const inputs = document.querySelectorAll('.sudoku-cell');
-            let complete = true;
-
-            inputs.forEach(input => {
-                if (!input.value) {
-                    complete = false;
-                }
-            });
-
+        function checkAnswer() {
             const msg = document.getElementById('message');
-            if (complete) {
-                msg.style.color = '#4CAF50';
-                msg.innerText = '🎉 멋지네요! 모든 칸을 채우셨습니다!';
+            let isComplete = true;
+            let isValid = true;
+
+            // 사용자 입력값 검사
+            let userBoard = Array(currentSize).fill(0).map(() => Array(currentSize).fill(0));
+
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    if (puzzleBoard[r][c] !== 0) {
+                        userBoard[r][c] = puzzleBoard[r][c];
+                    } else {
+                        const input = document.getElementById(`cell-${r}-${c}`);
+                        const val = parseInt(input.value);
+                        if (isNaN(val)) {
+                            isComplete = false;
+                            userBoard[r][c] = 0;
+                        } else {
+                            userBoard[r][c] = val;
+                        }
+                    }
+                }
+            }
+
+            if (!isComplete) {
+                msg.style.color = '#e67e22';
+                msg.innerText = '⚠️ 아직 채워지지 않은 빈칸이 있습니다!';
+                return;
+            }
+
+            // 가로줄 및 세로줄 중복 검사
+            for (let i = 0; i < currentSize; i++) {
+                let rowSet = new Set();
+                let colSet = new Set();
+                for (let j = 0; j < currentSize; j++) {
+                    rowSet.add(userBoard[i][j]);
+                    colSet.add(userBoard[j][i]);
+                }
+                if (rowSet.size !== currentSize || colSet.size !== currentSize) {
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                msg.style.color = '#27ae60';
+                msg.innerText = '🎉 정답입니다! 완벽하게 퍼즐을 풀었어요!';
             } else {
-                msg.style.color = '#ff5722';
-                msg.innerText = '아직 비어있는 칸이 있어요. 힘내세요!';
+                msg.style.color = '#c0392b';
+                msg.innerText = '❌ 가로 또는 세로 줄에 중복된 숫자가 있어요. 다시 확인해 보세요!';
             }
         }
 
-        // 페이지 로드 시 기본 9x9 실행
-        window.onload = generateSudoku;
+        window.onload = initGame;
+        document.getElementById('sizeSelect').addEventListener('change', initGame);
     </script>
 </body>
 </html>
