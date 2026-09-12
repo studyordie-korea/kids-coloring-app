@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 두뇌 스도쿠 (패드 및 스타일 개선 버전)</title>
+    <title>스마트 두뇌 스도쿠 (오류 하이라이트 버전)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -87,20 +87,25 @@
             font-weight: bold;
             background: transparent;
             box-sizing: border-box;
-            color: #2980b9; /* 내가 적은 숫자: 파란색 */
+            color: #2980b9; /* 내가 적은 숫자: 파란색 고정폭 글꼴 */
             font-family: 'Courier New', Courier, monospace;
         }
         input.sudoku-cell:focus {
             outline: 2px solid #e74c3c;
             background-color: #fadbd8;
         }
+        /* 주어진 고정 숫자: 진한 회색조 & 일반 Arial 굵은 글꼴 */
         .fixed-cell {
             background-color: #eaeded;
-            color: #2c3e50; /* 화면에 주어진 고정 숫자: 진한 회색조 & 굵은 글꼴 */
+            color: #2c3e50;
             font-weight: 900;
             font-family: 'Arial', sans-serif;
         }
-        /* 숫자 선택 패드 스타일 */
+        /* 중복 오류 발생 시 노란색 음영 하이라이트 */
+        .error-highlight {
+            background-color: #f9e79f !important;
+            color: #7d6608 !important;
+        }
         .number-pad {
             display: flex;
             gap: 6px;
@@ -144,7 +149,7 @@
 <body>
 
     <h1>🧩 스마트 두뇌 스도쿠</h1>
-    <p class="subtitle">입력 패드 및 스타일 개선 버전</p>
+    <p class="subtitle">글꼴 구분 및 오류 하이라이트 버전</p>
 
     <div class="controls">
         <select id="sizeSelect">
@@ -164,7 +169,6 @@
         <div id="board-container">
             <div id="sudoku-board"></div>
         </div>
-        <!-- 마우스/터치로 편하게 입력하는 숫자 패드 -->
         <div class="number-pad" id="numberPad"></div>
     </div>
 
@@ -174,7 +178,7 @@
         let currentSize = 9;
         let solutionBoard = [];
         let puzzleBoard = [];
-        let activeCell = null; // 현재 선택된 입력 칸 추적
+        let activeCell = null;
 
         const templates = {
             4: [
@@ -286,7 +290,7 @@
                     let isFixed = val !== 0;
 
                     if (isFixed) {
-                        html += `<td><input type="number" class="sudoku-cell fixed-cell" value="${val}" readonly></td>`;
+                        html += `<td><input type="number" class="sudoku-cell fixed-cell" id="cell-${r}-${c}" value="${val}" readonly></td>`;
                     } else {
                         html += `<td><input type="number" class="sudoku-cell" min="1" max="${currentSize}" id="cell-${r}-${c}" onfocus="setActiveCell(this)" placeholder=""></td>`;
                     }
@@ -297,7 +301,6 @@
             container.innerHTML = html;
         }
 
-        // 숫자 패드 동적 생성 (1부터 현재 크기까지)
         function renderNumberPad() {
             const padContainer = document.getElementById('numberPad');
             let html = '';
@@ -312,7 +315,6 @@
             activeCell = element;
         }
 
-        // 패드 버튼 클릭 시 선택된 칸에 숫자 입력
         function inputNumber(num) {
             if (activeCell) {
                 activeCell.value = num;
@@ -321,22 +323,27 @@
 
         function checkAnswer() {
             const msg = document.getElementById('message');
+            
+            // 기존 하이라이트 초기화
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.classList.remove('error-highlight');
+                }
+            }
+
             let isComplete = true;
             let userBoard = Array(currentSize).fill(0).map(() => Array(currentSize).fill(0));
 
             for (let r = 0; r < currentSize; r++) {
                 for (let c = 0; c < currentSize; c++) {
-                    if (puzzleBoard[r][c] !== 0) {
-                        userBoard[r][c] = puzzleBoard[r][c];
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    const val = parseInt(cell.value);
+                    if (isNaN(val)) {
+                        isComplete = false;
+                        userBoard[r][c] = 0;
                     } else {
-                        const input = document.getElementById(`cell-${r}-${c}`);
-                        const val = parseInt(input.value);
-                        if (isNaN(val)) {
-                            isComplete = false;
-                            userBoard[r][c] = 0;
-                        } else {
-                            userBoard[r][c] = val;
-                        }
+                        userBoard[r][c] = val;
                     }
                 }
             }
@@ -348,15 +355,35 @@
             }
 
             let isValid = true;
-            for (let i = 0; i < currentSize; i++) {
-                let rowSet = new Set();
-                let colSet = new Set();
-                for (let j = 0; j < currentSize; j++) {
-                    rowSet.add(userBoard[i][j]);
-                    colSet.add(userBoard[j][i]);
+            let errorCells = new Set();
+
+            // 가로줄 중복 검사 및 오류 위치 수집
+            for (let r = 0; r < currentSize; r++) {
+                let seen = {};
+                for (let c = 0; c < currentSize; c++) {
+                    let val = userBoard[r][c];
+                    if (seen[val] !== undefined) {
+                        errorCells.add(`${r}-${c}`);
+                        errorCells.add(`${r}-${seen[val]}`);
+                        isValid = false;
+                    } else {
+                        seen[val] = c;
+                    }
                 }
-                if (rowSet.size !== currentSize || colSet.size !== currentSize) {
-                    isValid = false;
+            }
+
+            // 세로줄 중복 검사 및 오류 위치 수집
+            for (let c = 0; c < currentSize; c++) {
+                let seen = {};
+                for (let r = 0; r < currentSize; r++) {
+                    let val = userBoard[r][c];
+                    if (seen[val] !== undefined) {
+                        errorCells.add(`${r}-${c}`);
+                        errorCells.add(`${seen[val]}-${c}`);
+                        isValid = false;
+                    } else {
+                        seen[val] = r;
+                    }
                 }
             }
 
@@ -365,7 +392,14 @@
                 msg.innerText = '🎉 정답입니다! 완벽하게 퍼즐을 풀었어요!';
             } else {
                 msg.style.color = '#c0392b';
-                msg.innerText = '❌ 가로 또는 세로 줄에 중복된 숫자가 있어요. 다시 확인해 보세요!';
+                msg.innerText = '❌ 중복된 숫자가 있습니다. 노란색으로 표시된 칸을 확인해 보세요!';
+                
+                // 틀린 칸들에 노란색 음영 하이라이트 적용
+                errorCells.forEach(pos => {
+                    const [r, c] = pos.split('-');
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.classList.add('error-highlight');
+                });
             }
         }
 
