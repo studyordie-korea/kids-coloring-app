@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 두뇌 스도쿠 (오류 하이라이트 버전)</title>
+    <title>스마트 두뇌 스도쿠 (색상 구분 완성 버전)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -78,6 +78,7 @@
             vertical-align: middle;
             padding: 0;
         }
+        /* 내가 입력해야 할 빈칸: 배경색 흰색, 파란색 고정폭 글꼴 */
         input.sudoku-cell {
             width: 100%;
             height: 100%;
@@ -85,18 +86,18 @@
             text-align: center;
             font-size: 1.2rem;
             font-weight: bold;
-            background: transparent;
+            background-color: #ffffff;
             box-sizing: border-box;
-            color: #2980b9; /* 내가 적은 숫자: 파란색 고정폭 글꼴 */
+            color: #2980b9;
             font-family: 'Courier New', Courier, monospace;
         }
         input.sudoku-cell:focus {
             outline: 2px solid #e74c3c;
             background-color: #fadbd8;
         }
-        /* 주어진 고정 숫자: 진한 회색조 & 일반 Arial 굵은 글꼴 */
+        /* 주어진 고정 숫자 칸: 옅은 회색 배경, 진한 회색조 Arial 굵은 글꼴 */
         .fixed-cell {
-            background-color: #eaeded;
+            background-color: #e5e8e8 !important;
             color: #2c3e50;
             font-weight: 900;
             font-family: 'Arial', sans-serif;
@@ -149,7 +150,7 @@
 <body>
 
     <h1>🧩 스마트 두뇌 스도쿠</h1>
-    <p class="subtitle">글꼴 구분 및 오류 하이라이트 버전</p>
+    <p class="subtitle">입력칸 흰색 & 고정칸 회색 구분 버전</p>
 
     <div class="controls">
         <select id="sizeSelect">
@@ -324,7 +325,6 @@
         function checkAnswer() {
             const msg = document.getElementById('message');
             
-            // 기존 하이라이트 초기화
             for (let r = 0; r < currentSize; r++) {
                 for (let c = 0; c < currentSize; c++) {
                     const cell = document.getElementById(`cell-${r}-${c}`);
@@ -357,7 +357,6 @@
             let isValid = true;
             let errorCells = new Set();
 
-            // 가로줄 중복 검사 및 오류 위치 수집
             for (let r = 0; r < currentSize; r++) {
                 let seen = {};
                 for (let c = 0; c < currentSize; c++) {
@@ -372,7 +371,6 @@
                 }
             }
 
-            // 세로줄 중복 검사 및 오류 위치 수집
             for (let c = 0; c < currentSize; c++) {
                 let seen = {};
                 for (let r = 0; r < currentSize; r++) {
@@ -394,7 +392,6 @@
                 msg.style.color = '#c0392b';
                 msg.innerText = '❌ 중복된 숫자가 있습니다. 노란색으로 표시된 칸을 확인해 보세요!';
                 
-                // 틀린 칸들에 노란색 음영 하이라이트 적용
                 errorCells.forEach(pos => {
                     const [r, c] = pos.split('-');
                     const cell = document.getElementById(`cell-${r}-${c}`);
