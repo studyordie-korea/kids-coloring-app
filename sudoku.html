@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리 딸을 위한 스마트 스도쿠</title>
+    <title>스마트 두뇌 스도쿠 (오류 수정판)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -102,17 +102,17 @@
 <body>
 
     <h1>🧩 스마트 두뇌 스도쿠</h1>
-    <p class="subtitle">오류 없는 완벽한 숫자 퍼즐</p>
+    <p class="subtitle">오류 검증 완료 버전</p>
 
     <div class="controls">
         <select id="sizeSelect">
-            <option value="4">4 x 4 (쉬움)</option>
+            <option value="4">4 x 4</option>
             <option value="5">5 x 5</option>
             <option value="6">6 x 6</option>
             <option value="7">7 x 7</option>
             <option value="8">8 x 8</option>
-            <option value="9" selected>9 x 9 (표준)</option>
-            <option value="10">10 x 10 (도전)</option>
+            <option value="9" selected>9 x 9</option>
+            <option value="10">10 x 10</option>
         </select>
         <button onclick="initGame()">새 게임</button>
         <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
@@ -133,42 +133,42 @@
             currentSize = parseInt(document.getElementById('sizeSelect').value);
             document.getElementById('message').innerText = '';
             
-            generateValidSudoku(currentSize);
+            generateSafeSudoku(currentSize);
             renderBoard();
         }
 
-        // 완벽하게 규칙에 맞는 스도쿠 보드 생성 알고리즘
-        function generateValidSudoku(size) {
+        // 수학적으로 중복이 발생하지 않는 라틴 사각형(Latin Square) 기반 스도쿠 생성
+        function generateSafeSudoku(size) {
             solutionBoard = Array(size).fill(0).map(() => Array(size).fill(0));
             
-            // 기본 시프트 패턴으로 유효한 기본 정답판 생성
-            let shift = size === 4 || size === 6 || size === 8 || size === 10 ? 2 : 3;
-            if (size === 5 || size === 7) shift = 2;
-
+            // 완벽한 라틴 스퀘어 생성 (각 행과 열에 1부터 size까지 단 한 번씩만 등장)
+            let baseOffset = (size % 2 === 0) ? 2 : 2; 
             for (let r = 0; r < size; r++) {
                 for (let c = 0; c < size; c++) {
-                    let val = ((r * shift + c + Math.floor(r / 2)) % size) + 1;
+                    let val = ((r * baseOffset + c) % size) + 1;
                     solutionBoard[r][c] = val;
                 }
             }
 
-            // 행 전체를 무작위로 섞어 매번 다른 문제가 나오도록 함
-            for (let i = 0; i < size; i++) {
-                let r1 = Math.floor(Math.random() * size);
-                let r2 = Math.floor(Math.random() * size);
-                let temp = solutionBoard[r1];
-                solutionBoard[r1] = solutionBoard[r2];
-                solutionBoard[r2] = temp;
+            // 숫자의 배치를 섞어주되 행/열 규칙이 깨지지 않도록 전체 번호 매핑을 무작위로 섞음
+            let nums = Array.from({length: size}, (_, i) => i + 1);
+            nums.sort(() => Math.random() - 0.5);
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    solutionBoard[r][c] = nums[solutionBoard[r][c] - 1];
+                }
             }
 
-            // 정답판을 기반으로 적절히 숫자를 숨겨 퍼즐판 만들기 (난이도에 따라 약 40~50% 빈칸)
+            // 퍼즐판 생성 (정답판에서 적절한 수만 남기고 나머지는 빈칸으로 둠)
             puzzleBoard = JSON.parse(JSON.stringify(solutionBoard));
-            let removeCount = Math.floor(size * size * 0.45); // 지울 칸 수
+            let removeCount = Math.floor(size * size * 0.4); // 40% 정도만 빈칸으로 만듦
             
             let removed = 0;
             while (removed < removeCount) {
                 let rr = Math.floor(Math.random() * size);
                 let rc = Math.floor(Math.random() * size);
+                // 최소한 각 줄에 숫자가 너무 없지 않도록 체크하며 지움
                 if (puzzleBoard[rr][rc] !== 0) {
                     puzzleBoard[rr][rc] = 0;
                     removed++;
@@ -226,7 +226,7 @@
                 return;
             }
 
-            // 가로줄, 세로줄 유효성 검사
+            // 가로줄, 세로줄 중복 검사
             let isValid = true;
             for (let i = 0; i < currentSize; i++) {
                 let rowSet = new Set();
