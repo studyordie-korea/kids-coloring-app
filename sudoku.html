@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 두뇌 스도쿠 (템플릿 안정화 버전)</title>
+    <title>스마트 두뇌 스도쿠 (패드 및 스타일 개선 버전)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -51,13 +51,20 @@
         button:active {
             background-color: #2980b9;
         }
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 100%;
+        }
         #board-container {
             overflow: auto;
             max-width: 100%;
-            background: white;
-            padding: 12px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         table {
             border-collapse: collapse;
@@ -65,8 +72,8 @@
         }
         td {
             border: 1px solid #7f8c8d;
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             text-align: center;
             vertical-align: middle;
             padding: 0;
@@ -80,15 +87,50 @@
             font-weight: bold;
             background: transparent;
             box-sizing: border-box;
-            color: #2980b9;
+            color: #2980b9; /* 내가 적은 숫자: 파란색 */
+            font-family: 'Courier New', Courier, monospace;
         }
         input.sudoku-cell:focus {
             outline: 2px solid #e74c3c;
             background-color: #fadbd8;
         }
         .fixed-cell {
-            background-color: #d5dbdb;
+            background-color: #eaeded;
+            color: #2c3e50; /* 화면에 주어진 고정 숫자: 진한 회색조 & 굵은 글꼴 */
+            font-weight: 900;
+            font-family: 'Arial', sans-serif;
+        }
+        /* 숫자 선택 패드 스타일 */
+        .number-pad {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 350px;
+        }
+        .pad-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #ecf0f1;
             color: #2c3e50;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        .pad-btn:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .pad-btn.clear-btn {
+            width: auto;
+            padding: 0 10px;
+            background-color: #e74c3c;
+            color: white;
+            border-color: #c0392b;
         }
         .message {
             margin-top: 15px;
@@ -102,7 +144,7 @@
 <body>
 
     <h1>🧩 스마트 두뇌 스도쿠</h1>
-    <p class="subtitle">오류 원천 차단 템플릿 버전</p>
+    <p class="subtitle">입력 패드 및 스타일 개선 버전</p>
 
     <div class="controls">
         <select id="sizeSelect">
@@ -118,8 +160,12 @@
         <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
     </div>
 
-    <div id="board-container">
-        <div id="sudoku-board"></div>
+    <div class="game-layout">
+        <div id="board-container">
+            <div id="sudoku-board"></div>
+        </div>
+        <!-- 마우스/터치로 편하게 입력하는 숫자 패드 -->
+        <div class="number-pad" id="numberPad"></div>
     </div>
 
     <div class="message" id="message"></div>
@@ -128,8 +174,8 @@
         let currentSize = 9;
         let solutionBoard = [];
         let puzzleBoard = [];
+        let activeCell = null; // 현재 선택된 입력 칸 추적
 
-        // 미리 검증된 크기별 완벽한 정답 템플릿 모음
         const templates = {
             4: [
                 [1, 2, 3, 4],
@@ -139,10 +185,10 @@
             ],
             5: [
                 [1, 2, 3, 4, 5],
-                [2, 3, 5, 5, 1], // 임시 방지용 아래 정확한 라틴 스퀘어로 대체됨
-                [3, 5, 1, 5, 2],
-                [4, 1, 2, 5, 3],
-                [5, 4, 4, 1, 2]
+                [4, 5, 1, 2, 3],
+                [2, 3, 4, 5, 1],
+                [5, 1, 2, 3, 4],
+                [3, 4, 5, 1, 2]
             ],
             6: [
                 [1, 2, 3, 4, 5, 6],
@@ -196,27 +242,14 @@
             ]
         };
 
-        // 5x5 전용 완벽 템플릿 보정
-        templates[5] = [
-            [1, 2, 3, 4, 5],
-            [3, 4, 5, 5, 2] // -> 재정의
-        ];
-        templates[5] = [
-            [1, 2, 3, 4, 5],
-            [4, 5, 1, 2, 3],
-            [2, 3, 4, 5, 1],
-            [5, 1, 2, 3, 4],
-            [3, 4, 5, 1, 2]
-        ];
-
         function initGame() {
             currentSize = parseInt(document.getElementById('sizeSelect').value);
             document.getElementById('message').innerText = '';
+            activeCell = null;
             
             let baseTemplate = templates[currentSize];
             solutionBoard = JSON.parse(JSON.stringify(baseTemplate));
 
-            // 숫자를 무작위로 섞어 매번 다른 문제처럼 보이게 함 (1부터 size까지의 숫자를 다른 숫자로 매핑)
             let nums = Array.from({length: currentSize}, (_, i) => i + 1);
             nums.sort(() => Math.random() - 0.5);
 
@@ -226,7 +259,6 @@
                 }
             }
 
-            // 퍼즐판 생성 (약 35%만 구멍 뚫기)
             puzzleBoard = JSON.parse(JSON.stringify(solutionBoard));
             let removeCount = Math.max(1, Math.floor(currentSize * currentSize * 0.35));
             
@@ -240,6 +272,7 @@
                 }
             }
             renderBoard();
+            renderNumberPad();
         }
 
         function renderBoard() {
@@ -255,13 +288,35 @@
                     if (isFixed) {
                         html += `<td><input type="number" class="sudoku-cell fixed-cell" value="${val}" readonly></td>`;
                     } else {
-                        html += `<td><input type="number" class="sudoku-cell" min="1" max="${currentSize}" id="cell-${r}-${c}" placeholder=""></td>`;
+                        html += `<td><input type="number" class="sudoku-cell" min="1" max="${currentSize}" id="cell-${r}-${c}" onfocus="setActiveCell(this)" placeholder=""></td>`;
                     }
                 }
                 html += '</tr>';
             }
             html += '</table>';
             container.innerHTML = html;
+        }
+
+        // 숫자 패드 동적 생성 (1부터 현재 크기까지)
+        function renderNumberPad() {
+            const padContainer = document.getElementById('numberPad');
+            let html = '';
+            for (let i = 1; i <= currentSize; i++) {
+                html += `<button class="pad-btn" onclick="inputNumber(${i})">${i}</button>`;
+            }
+            html += `<button class="pad-btn clear-btn" onclick="inputNumber('')">지우기</button>`;
+            padContainer.innerHTML = html;
+        }
+
+        function setActiveCell(element) {
+            activeCell = element;
+        }
+
+        // 패드 버튼 클릭 시 선택된 칸에 숫자 입력
+        function inputNumber(num) {
+            if (activeCell) {
+                activeCell.value = num;
+            }
         }
 
         function checkAnswer() {
@@ -292,7 +347,6 @@
                 return;
             }
 
-            // 가로줄, 세로줄 중복 검사
             let isValid = true;
             for (let i = 0; i < currentSize; i++) {
                 let rowSet = new Set();
