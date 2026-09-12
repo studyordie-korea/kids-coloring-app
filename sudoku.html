@@ -2,215 +2,452 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>모바일 최적화 스도쿠</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 두뇌 스도쿠 (색상 구분 완성 버전)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 10px;
+            background-color: #f7f9fc;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 10px;
             user-select: none;
             -webkit-user-select: none;
         }
-
-        h2 {
-            margin: 10px 0;
+        h1 {
             color: #2c3e50;
-        }
-
-        /* 보드 레이아웃 */
-        .sudoku-board {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            width: min(92vw, 400px);
-            height: min(92vw, 400px);
-            border: 2.5px solid #2c3e50;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        /* 각 셀 스타일 */
-        .cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 0.5px solid #bdc3c7;
             font-size: 1.4rem;
-            font-weight: bold;
-            color: #2980b9;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        p.subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        select, button {
+            padding: 8px 14px;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            border: 1px solid #bdc3c7;
+            background-color: #fff;
             cursor: pointer;
-            box-sizing: border-box;
+            font-weight: bold;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+        button:active {
+            background-color: #2980b9;
+        }
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 100%;
+        }
+        #board-container {
+            overflow: auto;
+            max-width: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        td {
+            border: 1px solid #7f8c8d;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+        /* 입력칸: type="text"와 모바일 커서 최적화 */
+        input.sudoku-cell {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
             background-color: #ffffff;
+            box-sizing: border-box;
+            color: #2980b9;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            padding: 0;
         }
-
-        /* 3x3 구획 굵은 경계선 */
-        .cell:nth-child(3n) { border-right: 2px solid #2c3e50; }
-        .cell:nth-child(9n) { border-right: none; }
-        .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 2px solid #2c3e50;
+        /* 선택된 셀 강조 스타일 */
+        input.sudoku-cell:focus, input.sudoku-cell.active-cell {
+            outline: 2px solid #e74c3c;
+            background-color: #fadbd8 !important;
         }
-
-        /* 셀 선택 상태 */
-        .cell.selected {
-            background-color: #d6eaf8 !important;
-        }
-
-        /* 초기 고정 숫자 */
-        .cell.fixed {
-            color: #2c3e50;
-            background-color: #f2f4f4;
-        }
-
-        /* 핵심: 10 및 두 자리 숫자 폰트 축소 (0 가림 방지) */
-        .cell.two-digits {
-            font-size: 0.95rem !important;
+        /* 숫자 10 전용 스타일 (0 잘림 방지) */
+        input.sudoku-cell.num-10 {
+            font-size: 0.92rem !important;
             letter-spacing: -1.5px;
             padding-right: 1px;
         }
-
-        /* 모바일용 자체 숫자 패드 */
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 6px;
-            width: min(92vw, 400px);
-            margin-top: 20px;
+        /* 고정 숫자 칸 */
+        .fixed-cell {
+            background-color: #e5e8e8 !important;
+            color: #2c3e50 !important;
+            font-weight: 900;
+            font-family: 'Arial', sans-serif;
+            cursor: default !important;
         }
-
-        .key-btn {
-            height: 48px;
-            font-size: 1.2rem;
+        /* 중복 오류 하이라이트 */
+        .error-highlight {
+            background-color: #f9e79f !important;
+            color: #7d6608 !important;
+        }
+        .number-pad {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 350px;
+        }
+        .pad-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
             font-weight: bold;
+            background-color: #ecf0f1;
+            color: #2c3e50;
             border: 1px solid #bdc3c7;
             border-radius: 6px;
-            background-color: #ffffff;
-            color: #2c3e50;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: all 0.1s ease;
+            padding: 0;
         }
-
-        .key-btn:active {
-            background-color: #ebf5fb;
+        .pad-btn.num-10 {
+            font-size: 0.95rem;
+            letter-spacing: -1px;
         }
-
-        .key-btn.action {
+        .pad-btn:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .pad-btn.clear-btn {
+            width: auto;
+            padding: 0 10px;
             background-color: #e74c3c;
             color: white;
-            border: none;
-            font-size: 1rem;
+            border-color: #c0392b;
         }
-
-        /* 숫자 패드의 10 버튼도 비율 조정 */
-        .key-btn.num-10 {
-            font-size: 1.05rem;
-            letter-spacing: -1px;
+        .message {
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            min-height: 24px;
         }
     </style>
 </head>
 <body>
 
-    <h2>스도쿠</h2>
+    <h1>🧩 스마트 두뇌 스도쿠</h1>
+    <p class="subtitle">입력칸 흰색 & 고정칸 회색 구분 버전</p>
 
-    <div class="sudoku-board" id="board"></div>
-
-    <!-- 모바일 가상 키보드를 원천 차단하는 온스크린 숫자 패드 -->
-    <div class="keypad">
-        <button class="key-btn" onclick="inputNumber(1)">1</button>
-        <button class="key-btn" onclick="inputNumber(2)">2</button>
-        <button class="key-btn" onclick="inputNumber(3)">3</button>
-        <button class="key-btn" onclick="inputNumber(4)">4</button>
-        <button class="key-btn" onclick="inputNumber(5)">5</button>
-        <button class="key-btn action" onclick="clearCell()">지우기</button>
-        <button class="key-btn" onclick="inputNumber(6)">6</button>
-        <button class="key-btn" onclick="inputNumber(7)">7</button>
-        <button class="key-btn" onclick="inputNumber(8)">8</button>
-        <button class="key-btn" onclick="inputNumber(9)">9</button>
-        <button class="key-btn num-10" onclick="inputNumber(10)">10</button>
-        <button class="key-btn action" style="background-color: #34495e;" onclick="deselectCell()">선택해제</button>
+    <div class="controls">
+        <select id="sizeSelect">
+            <option value="4">4 x 4</option>
+            <option value="5">5 x 5</option>
+            <option value="6">6 x 6</option>
+            <option value="7">7 x 7</option>
+            <option value="8">8 x 8</option>
+            <option value="9" selected>9 x 9</option>
+            <option value="10">10 x 10</option>
+        </select>
+        <button onclick="initGame()">새 게임</button>
+        <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
     </div>
 
+    <div class="game-layout">
+        <div id="board-container">
+            <div id="sudoku-board"></div>
+        </div>
+        <div class="number-pad" id="numberPad"></div>
+    </div>
+
+    <div class="message" id="message"></div>
+
     <script>
-        const board = document.getElementById('board');
-        let selectedCell = null;
+        let currentSize = 9;
+        let solutionBoard = [];
+        let puzzleBoard = [];
+        let activeCell = null;
 
-        // 예시용 초기 배치 데이터 (0은 빈칸)
-        const initialData = [
-            0, 0, 3, 0, 2, 0, 6, 0, 0,
-            9, 0, 0, 3, 0, 5, 0, 0, 1,
-            0, 0, 1, 8, 0, 6, 4, 0, 0,
-            0, 0, 8, 1, 0, 2, 9, 0, 0,
-            7, 0, 0, 0, 0, 0, 0, 0, 8,
-            0, 0, 6, 7, 0, 8, 2, 0, 0,
-            0, 0, 2, 6, 0, 9, 5, 0, 0,
-            8, 0, 0, 2, 0, 3, 0, 0, 9,
-            0, 0, 5, 0, 1, 0, 3, 0, 0
-        ];
+        const templates = {
+            4: [
+                [1, 2, 3, 4],
+                [3, 4, 1, 2],
+                [2, 1, 4, 3],
+                [4, 3, 2, 1]
+            ],
+            5: [
+                [1, 2, 3, 4, 5],
+                [4, 5, 1, 2, 3],
+                [2, 3, 4, 5, 1],
+                [5, 1, 2, 3, 4],
+                [3, 4, 5, 1, 2]
+            ],
+            6: [
+                [1, 2, 3, 4, 5, 6],
+                [3, 4, 5, 6, 1, 2],
+                [5, 6, 1, 2, 3, 4],
+                [2, 1, 4, 3, 6, 5],
+                [4, 3, 6, 5, 2, 1],
+                [6, 5, 2, 1, 4, 3]
+            ],
+            7: [
+                [1, 2, 3, 4, 5, 6, 7],
+                [3, 4, 5, 6, 7, 1, 2],
+                [5, 6, 7, 1, 2, 3, 4],
+                [7, 1, 2, 3, 4, 5, 6],
+                [2, 3, 4, 5, 6, 7, 1],
+                [4, 5, 6, 7, 1, 2, 3],
+                [6, 7, 1, 2, 3, 4, 5]
+            ],
+            8: [
+                [1, 2, 3, 4, 5, 6, 7, 8],
+                [3, 4, 1, 2, 7, 8, 5, 6],
+                [5, 6, 7, 8, 1, 2, 3, 4],
+                [7, 8, 5, 6, 3, 4, 1, 2],
+                [2, 1, 4, 3, 6, 5, 8, 7],
+                [4, 3, 2, 1, 8, 7, 6, 5],
+                [6, 5, 8, 7, 2, 1, 4, 3],
+                [8, 7, 6, 5, 4, 3, 2, 1]
+            ],
+            9: [
+                [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                [4, 5, 6, 7, 8, 9, 1, 2, 3],
+                [7, 8, 9, 1, 2, 3, 4, 5, 6],
+                [2, 3, 1, 5, 6, 4, 8, 9, 7],
+                [5, 6, 4, 8, 9, 7, 2, 3, 1],
+                [8, 9, 7, 2, 3, 1, 5, 6, 4],
+                [3, 1, 2, 6, 4, 5, 9, 7, 8],
+                [6, 4, 5, 9, 7, 8, 3, 1, 2],
+                [9, 7, 8, 3, 1, 2, 6, 4, 5]
+            ],
+            10: [
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
+                [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
+                [7, 8, 9, 10, 1, 2, 3, 4, 5, 6],
+                [9, 10, 1, 2, 3, 4, 5, 6, 7, 8],
+                [2, 1, 4, 3, 6, 5, 8, 7, 10, 9],
+                [4, 3, 6, 5, 8, 7, 10, 9, 2, 1],
+                [6, 5, 8, 7, 10, 9, 2, 1, 4, 3],
+                [8, 7, 10, 9, 2, 1, 4, 3, 6, 5],
+                [10, 9, 2, 1, 4, 3, 6, 5, 8, 7]
+            ]
+        };
 
-        // 보드 생성 (input 태그를 배제하여 모바일 키보드 출현 완전 차단)
-        for (let i = 0; i < 81; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            cell.dataset.index = i;
+        function initGame() {
+            currentSize = parseInt(document.getElementById('sizeSelect').value);
+            document.getElementById('message').innerText = '';
+            activeCell = null;
+            
+            let baseTemplate = templates[currentSize];
+            solutionBoard = JSON.parse(JSON.stringify(baseTemplate));
 
-            if (initialData[i] !== 0) {
-                cell.textContent = initialData[i];
-                cell.classList.add('fixed');
-            } else {
-                cell.addEventListener('click', () => selectCell(cell));
+            let nums = Array.from({length: currentSize}, (_, i) => i + 1);
+            nums.sort(() => Math.random() - 0.5);
+
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    solutionBoard[r][c] = nums[baseTemplate[r][c] - 1];
+                }
             }
 
-            board.appendChild(cell);
-        }
-
-        function selectCell(cell) {
-            if (selectedCell) {
-                selectedCell.classList.remove('selected');
+            puzzleBoard = JSON.parse(JSON.stringify(solutionBoard));
+            let removeCount = Math.max(1, Math.floor(currentSize * currentSize * 0.35));
+            
+            let removed = 0;
+            while (removed < removeCount) {
+                let rr = Math.floor(Math.random() * currentSize);
+                let rc = Math.floor(Math.random() * currentSize);
+                if (puzzleBoard[rr][rc] !== 0) {
+                    puzzleBoard[rr][rc] = 0;
+                    removed++;
+                }
             }
-            selectedCell = cell;
-            cell.classList.add('selected');
+            renderBoard();
+            renderNumberPad();
         }
 
-        function deselectCell() {
-            if (selectedCell) {
-                selectedCell.classList.remove('selected');
-                selectedCell = null;
+        function renderBoard() {
+            const container = document.getElementById('sudoku-board');
+            let html = '<table>';
+            
+            for (let r = 0; r < currentSize; r++) {
+                html += '<tr>';
+                for (let c = 0; c < currentSize; c++) {
+                    let val = puzzleBoard[r][c];
+                    let isFixed = val !== 0;
+                    let num10Class = val === 10 ? ' num-10' : '';
+
+                    // inputmode="none"과 readonly로 모바일 가상 키보드 완전 차단
+                    if (isFixed) {
+                        html += `<td><input type="text" inputmode="none" class="sudoku-cell fixed-cell${num10Class}" id="cell-${r}-${c}" value="${val}" readonly></td>`;
+                    } else {
+                        html += `<td><input type="text" inputmode="none" class="sudoku-cell" id="cell-${r}-${c}" onclick="setActiveCell(this)" onfocus="setActiveCell(this)" readonly placeholder=""></td>`;
+                    }
+                }
+                html += '</tr>';
             }
+            html += '</table>';
+            container.innerHTML = html;
         }
 
-        // 숫자 입력 및 10 폰트 축소 분기
+        function renderNumberPad() {
+            const padContainer = document.getElementById('numberPad');
+            let html = '';
+            for (let i = 1; i <= currentSize; i++) {
+                let num10Class = i === 10 ? ' num-10' : '';
+                html += `<button class="pad-btn${num10Class}" onclick="inputNumber(${i})">${i}</button>`;
+            }
+            html += `<button class="pad-btn clear-btn" onclick="inputNumber('')">지우기</button>`;
+            padContainer.innerHTML = html;
+        }
+
+        function setActiveCell(element) {
+            if (activeCell) {
+                activeCell.classList.remove('active-cell');
+            }
+            activeCell = element;
+            activeCell.classList.add('active-cell');
+        }
+
         function inputNumber(num) {
-            if (!selectedCell || selectedCell.classList.contains('fixed')) return;
-
-            selectedCell.textContent = num;
-
-            // 값이 10이거나 두 자리 이상이면 글자 크기를 즉시 축소
-            if (num >= 10) {
-                selectedCell.classList.add('two-digits');
-            } else {
-                selectedCell.classList.remove('two-digits');
+            if (activeCell && !activeCell.classList.contains('fixed-cell')) {
+                activeCell.value = num;
+                
+                // 10이 입력되면 글자 크기 축소 클래스 부여
+                if (num === 10 || num === '10') {
+                    activeCell.classList.add('num-10');
+                } else {
+                    activeCell.classList.remove('num-10');
+                }
             }
         }
 
-        // 셀 값 지우기
-        function clearCell() {
-            if (!selectedCell || selectedCell.classList.contains('fixed')) return;
-            selectedCell.textContent = '';
-            selectedCell.classList.remove('two-digits');
-        }
+        // PC 사용자를 위한 키보드 지원 (readonly 상태에서도 물리 키보드로 숫자 입력 가능)
+        window.addEventListener('keydown', (e) => {
+            if (!activeCell || activeCell.classList.contains('fixed-cell')) return;
 
-        // 보드 외부 클릭 시 선택 해제
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.sudoku-board') && !e.target.closest('.keypad')) {
-                deselectCell();
+            if (e.key >= '1' && e.key <= '9') {
+                inputNumber(parseInt(e.key));
+            } else if (e.key === '0') {
+                if (currentSize === 10 && activeCell.value === '1') {
+                    inputNumber(10);
+                }
+            } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                inputNumber('');
             }
         });
+
+        function checkAnswer() {
+            const msg = document.getElementById('message');
+            
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.classList.remove('error-highlight');
+                }
+            }
+
+            let isComplete = true;
+            let userBoard = Array(currentSize).fill(0).map(() => Array(currentSize).fill(0));
+
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    const val = parseInt(cell.value);
+                    if (isNaN(val)) {
+                        isComplete = false;
+                        userBoard[r][c] = 0;
+                    } else {
+                        userBoard[r][c] = val;
+                    }
+                }
+            }
+
+            if (!isComplete) {
+                msg.style.color = '#e67e22';
+                msg.innerText = '⚠️ 아직 채워지지 않은 빈칸이 있습니다!';
+                return;
+            }
+
+            let isValid = true;
+            let errorCells = new Set();
+
+            for (let r = 0; r < currentSize; r++) {
+                let seen = {};
+                for (let c = 0; c < currentSize; c++) {
+                    let val = userBoard[r][c];
+                    if (seen[val] !== undefined) {
+                        errorCells.add(`${r}-${c}`);
+                        errorCells.add(`${r}-${seen[val]}`);
+                        isValid = false;
+                    } else {
+                        seen[val] = c;
+                    }
+                }
+            }
+
+            for (let c = 0; c < currentSize; c++) {
+                let seen = {};
+                for (let r = 0; r < currentSize; r++) {
+                    let val = userBoard[r][c];
+                    if (seen[val] !== undefined) {
+                        errorCells.add(`${r}-${c}`);
+                        errorCells.add(`${seen[val]}-${c}`);
+                        isValid = false;
+                    } else {
+                        seen[val] = r;
+                    }
+                }
+            }
+
+            if (isValid) {
+                msg.style.color = '#27ae60';
+                msg.innerText = '🎉 정답입니다! 완벽하게 퍼즐을 풀었어요!';
+            } else {
+                msg.style.color = '#c0392b';
+                msg.innerText = '❌ 중복된 숫자가 있습니다. 노란색으로 표시된 칸을 확인해 보세요!';
+                
+                errorCells.forEach(pos => {
+                    const [r, c] = pos.split('-');
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.classList.add('error-highlight');
+                });
+            }
+        }
+
+        window.onload = initGame;
+        document.getElementById('sizeSelect').addEventListener('change', initGame);
     </script>
 </body>
 </html>
