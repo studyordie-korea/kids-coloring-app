@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 네모네모 로직 (노노그램)</title>
+    <title>스마트 네모네모 로직 (11x11 확장 버전)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -33,16 +33,21 @@
             gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
         }
-        button {
+        select, button {
             padding: 8px 14px;
             font-size: 0.95rem;
             border-radius: 6px;
-            border: none;
-            background-color: #3498db;
-            color: white;
+            border: 1px solid #bdc3c7;
+            background-color: #fff;
             cursor: pointer;
             font-weight: bold;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
         }
         button:active {
             background-color: #2980b9;
@@ -57,7 +62,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             max-width: 100%;
-            overflow-x: auto;
+            overflow: auto;
         }
         table.nonogram-table {
             border-collapse: collapse;
@@ -65,11 +70,11 @@
         }
         .nonogram-table td {
             border: 1px solid #bdc3c7;
-            width: 30px;
-            height: 30px;
+            width: 26px;
+            height: 26px;
             text-align: center;
             vertical-align: middle;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             padding: 0;
             user-select: none;
@@ -81,6 +86,7 @@
             font-family: monospace;
             white-space: pre-wrap;
             line-height: 1.1;
+            font-size: 0.7rem;
         }
         /* 플레이어가 색칠하는 칸 (기본 흰색) */
         .play-cell {
@@ -99,7 +105,7 @@
         .play-cell.marked::after {
             content: '✕';
             color: #95a5a6;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         /* 모드 선택 버튼 영역 */
         .mode-selector {
@@ -133,9 +139,13 @@
 <body>
 
     <h1>🧩 네모네모 로직 (노노그램)</h1>
-    <p class="subtitle">마우스 클릭으로 칸을 채우거나 X표시를 해보세요!</p>
+    <p class="subtitle">11x11 고난도 퍼즐에 도전해 보세요!</p>
 
     <div class="controls">
+        <select id="sizeSelect" onchange="initGame()">
+            <option value="5">5 x 5 (쉬움)</option>
+            <option value="11" selected>11 x 11 (도전!)</option>
+        </select>
         <button onclick="initGame()">새 게임 시작</button>
         <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
     </div>
@@ -151,45 +161,70 @@
     <div class="message" id="message"></div>
 
     <script>
-        const size = 5; // 5x5 기본 크기 (원하시면 늘릴 수 있습니다)
+        let size = 11;
         let solution = [];
-        let playerBoard = []; // 0: 빈칸, 1: 채움(■), -1: X표시
-        let currentMode = 'fill'; // 'fill' 또는 'mark'
+        let playerBoard = [];
+        let currentMode = 'fill';
 
-        // 예시 정답 패턴 (5x5 하트 모양 등)
-        const patterns = [
-            [
-                [0, 1, 0, 1, 0],
-                [1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1],
-                [0, 1, 1, 1, 0],
-                [0, 0, 1, 0, 0]
+        // 5x5 및 11x11 패턴 모음
+        const patterns = {
+            5: [
+                [
+                    [0, 1, 0, 1, 0],
+                    [1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1],
+                    [0, 1, 1, 1, 0],
+                    [0, 0, 1, 0, 0]
+                ],
+                [
+                    [0, 0, 1, 0, 0],
+                    [0, 1, 1, 1, 0],
+                    [1, 1, 1, 1, 1],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0]
+                ]
             ],
-            [
-                [0, 0, 1, 0, 0],
-                [0, 1, 1, 1, 0],
-                [1, 1, 1, 1, 1],
-                [0, 0, 1, 0, 0],
-                [0, 0, 1, 0, 0]
-            ],
-            [
-                [1, 0, 1, 0, 1],
-                [0, 1, 1, 1, 0],
-                [1, 1, 1, 1, 1],
-                [0, 1, 1, 1, 0],
-                [1, 0, 1, 0, 1]
+            11: [
+                // 11x11 하트 패턴 예시
+                [
+                    [0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,1,1,0,0,0,1,1,0,0],
+                    [0,1,1,1,1,0,1,1,1,1,0],
+                    [1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1],
+                    [0,1,1,1,1,1,1,1,1,1,0],
+                    [0,0,1,1,1,1,1,1,1,0,0],
+                    [0,0,0,1,1,1,1,1,0,0,0],
+                    [0,0,0,0,1,1,1,0,0,0,0],
+                    [0,0,0,0,0,1,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0]
+                ],
+                // 11x11 웃는 얼굴 패턴 예시
+                [
+                    [0,0,1,1,1,1,1,1,1,0,0],
+                    [0,1,0,0,0,0,0,0,0,1,0],
+                    [1,0,1,0,0,0,0,0,1,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,0,0,0,0,1,0,1],
+                    [1,0,0,1,1,0,1,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,1,1,1,0,0,0,1],
+                    [0,1,0,0,0,0,0,0,0,1,0],
+                    [0,0,1,1,0,0,0,1,1,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0]
+                ]
             ]
-        ];
+        };
 
         function initGame() {
+            size = parseInt(document.getElementById('sizeSelect').value);
             document.getElementById('message').innerText = '';
-            // 무작위 패턴 선택
-            const randomIndex = Math.floor(Math.random() * patterns.length);
-            solution = patterns[randomIndex];
             
-            // 플레이어 보드 초기화
+            const list = patterns[size];
+            const randomIndex = Math.floor(Math.random() * list.length);
+            solution = list[randomIndex];
+            
             playerBoard = Array(size).fill(0).map(() => Array(size).fill(0));
-            
             renderBoard();
         }
 
@@ -199,7 +234,6 @@
             document.getElementById('modeMark').classList.toggle('active', mode === 'mark');
         }
 
-        // 행/열 힌트 숫자 계산
         function getHints(line) {
             let hints = [];
             let count = 0;
@@ -218,7 +252,6 @@
         function renderBoard() {
             const container = document.getElementById('board-container');
             
-            // 행 힌트 및 열 힌트 계산
             let rowHints = solution.map(row => getHints(row));
             let colHints = [];
             for (let c = 0; c < size; c++) {
@@ -231,21 +264,19 @@
 
             let html = '<table class="nonogram-table">';
             
-            // 상단 빈 코너 및 열 힌트 행 (5x5이므로 간단하게 상단 1줄에 열 힌트 표시)
+            // 상단 열 힌트 행
             html += '<tr>';
-            html += '<td class="hint-cell"></td>'; // 좌상단 코너
+            html += '<td class="hint-cell"></td>';
             for (let c = 0; c < size; c++) {
                 html += `<td class="hint-cell">${colHints[c].split(' ').join('<br>')}</td>`;
             }
             html += '</tr>';
 
-            // 본문 행 (행 힌트 + 플레이 칸들)
+            // 본문 행
             for (let r = 0; r < size; r++) {
                 html += '<tr>';
-                // 좌측 행 힌트
-                html += `<td class="hint-cell" style="padding: 0 5px;">${rowHints[r]}</td>`;
+                html += `<td class="hint-cell" style="padding: 0 3px;">${rowHints[r]}</td>`;
                 
-                // 플레이어 칸
                 for (let c = 0; c < size; c++) {
                     let val = playerBoard[r][c];
                     let cellClass = 'play-cell';
@@ -263,14 +294,11 @@
 
         function handleCellClick(r, c) {
             if (currentMode === 'fill') {
-                // 빈칸(0)이거나 X표시(-1)였다면 채우기(1)로, 채워져있었다면 빈칸으로
                 playerBoard[r][c] = playerBoard[r][c] === 1 ? 0 : 1;
             } else {
-                // 빈칸(0)이거나 채우기(1)였다면 X표시(-1)로, X표시였다면 빈칸으로
                 playerBoard[r][c] = playerBoard[r][c] === -1 ? 0 : -1;
             }
             
-            // 특정 칸만 업데이트하기 위해 DOM 직접 수정
             const cell = document.getElementById(`cell-${r}-${c}`);
             cell.className = 'play-cell';
             if (playerBoard[r][c] === 1) cell.classList.add('filled');
@@ -284,7 +312,7 @@
             for (let r = 0; r < size; r++) {
                 for (let c = 0; c < size; c++) {
                     let expected = solution[r][c];
-                    let actual = playerBoard[r][c] === 1 ? 1 : 0; // 채워야 하는 곳(1)과 플레이어가 채운 곳(1) 비교
+                    let actual = playerBoard[r][c] === 1 ? 1 : 0;
                     if (expected !== actual) {
                         isCorrect = false;
                     }
@@ -293,14 +321,13 @@
 
             if (isCorrect) {
                 msg.style.color = '#27ae60';
-                msg.innerText = '🎉 정답입니다! 그림을 완벽하게 맞추셨어요!';
+                msg.innerText = '🎉 정답입니다! 멋지게 완성하셨네요!';
             } else {
                 msg.style.color = '#c0392b';
                 msg.innerText = '❌ 아직 완성되지 않았거나 틀린 부분이 있습니다. 다시 확인해 보세요!';
             }
         }
 
-        // 페이지 로드 시 게임 시작
         window.onload = initGame;
     </script>
 </body>
