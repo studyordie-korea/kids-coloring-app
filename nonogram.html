@@ -91,7 +91,6 @@
             padding: 0;
             user-select: none;
         }
-        /* 보드 크기별 셀 규격 */
         .nonogram-table.size-5 td {
             width: 34px;
             height: 34px;
@@ -163,13 +162,12 @@
         }
         .message {
             margin-top: 10px;
-            font-size: 1.05rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
             font-weight: bold;
             text-align: center;
             min-height: 26px;
         }
-
-        /* 마우스를 따라다니는 드래그 칸 수 카운터 배지 */
         #drag-counter {
             position: fixed;
             display: none;
@@ -190,7 +188,6 @@
 </head>
 <body>
 
-    <!-- 마우스 추적 카운터 배지 -->
     <div id="drag-counter">1</div>
 
     <h1>🧩 네모네모 로직 (노노그램)</h1>
@@ -256,7 +253,6 @@
         let currentMode = 'fill';
         let currentTitle = '';
         
-        // 정밀 직선 드래그 & 카운팅 제어 변수
         let isDragging = false;
         let startR = -1;
         let startC = -1;
@@ -723,7 +719,6 @@
             container.oncontextmenu = (e) => e.preventDefault();
         }
 
-        // 마우스 드래그 시작 및 카운터 초기화
         function startDrag(r, c, event) {
             if (event.button !== 0 && event.button !== 2) return;
             event.preventDefault();
@@ -733,7 +728,6 @@
             startC = c;
             activeLineCells = [];
 
-            // 드래그 시작 시점의 보드 스냅샷 복사
             boardSnapshot = playerBoard.map(row => [...row]);
 
             let activeMode = currentMode;
@@ -748,7 +742,6 @@
                 dragTargetVal = (curVal === -1) ? 0 : -1;
             }
 
-            // 카운터 배지 노출 및 위치 설정
             const counter = document.getElementById('drag-counter');
             counter.innerText = '1';
             counter.style.left = `${event.clientX}px`;
@@ -758,19 +751,16 @@
             updateLine(r, c);
         }
 
-        // 드래그 이동 시 칸 수 계산 및 직선 보정
         function dragOver(r, c) {
             if (!isDragging) return;
             updateLine(r, c);
         }
 
-        // 가로/세로 직선 고정 및 실시간 칸 수 갱신 로직
         function updateLine(curR, curC) {
             const dr = Math.abs(curR - startR);
             const dc = Math.abs(curC - startC);
 
             let lineCells = [];
-            // 가로 이동 폭이 크면 가로 직선, 세로 이동 폭이 크면 세로 직선으로 빗겨나감 방지
             if (dc >= dr) {
                 const minC = Math.min(startC, curC);
                 const maxC = Math.max(startC, curC);
@@ -785,14 +775,12 @@
                 }
             }
 
-            // 직전 드래그 경로를 원래 상태로 복원
             for (let cell of activeLineCells) {
                 const origVal = boardSnapshot[cell.r][cell.c];
                 playerBoard[cell.r][cell.c] = origVal;
                 updateCellDOM(cell.r, cell.c, origVal);
             }
 
-            // 현재 유효 직선에 타깃 값 적용
             for (let cell of lineCells) {
                 playerBoard[cell.r][cell.c] = dragTargetVal;
                 updateCellDOM(cell.r, cell.c, dragTargetVal);
@@ -800,7 +788,6 @@
 
             activeLineCells = lineCells;
 
-            // 실시간 카운트 갱신
             const counter = document.getElementById('drag-counter');
             if (counter) {
                 counter.innerText = lineCells.length;
@@ -815,7 +802,6 @@
             if (val === -1) el.classList.add('marked');
         }
 
-        // 마우스 커서 위치를 실시간으로 따라다니는 이벤트
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const counter = document.getElementById('drag-counter');
@@ -823,7 +809,6 @@
             counter.style.top = `${e.clientY}px`;
         });
 
-        // 드래그 종료 시 카운터 숨김
         window.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
@@ -834,24 +819,48 @@
 
         function checkAnswer() {
             const msg = document.getElementById('message');
-            let isCorrect = true;
 
+            let wrongRows = [];
+            let wrongCols = [];
+
+            // 1. 틀린 가로줄(행) 검출
             for (let r = 0; r < size; r++) {
                 for (let c = 0; c < size; c++) {
-                    let expected = solution[r][c];
-                    let actual = playerBoard[r][c] === 1 ? 1 : 0;
-                    if (expected !== actual) {
-                        isCorrect = false;
+                    let actual = (playerBoard[r][c] === 1) ? 1 : 0;
+                    if (actual !== solution[r][c]) {
+                        wrongRows.push(r);
+                        break;
                     }
                 }
             }
 
-            if (isCorrect) {
+            // 2. 틀린 세로줄(열) 검출
+            for (let c = 0; c < size; c++) {
+                for (let r = 0; r < size; r++) {
+                    let actual = (playerBoard[r][c] === 1) ? 1 : 0;
+                    if (actual !== solution[r][c]) {
+                        wrongCols.push(c);
+                        break;
+                    }
+                }
+            }
+
+            // 3. 결과 분기 (시각적 하이라이트 없이 텍스트 줄 번호만 안내)
+            if (wrongRows.length === 0 && wrongCols.length === 0) {
                 msg.style.color = '#27ae60';
-                msg.innerText = `🎉 정답입니다! 완성된 그림은 [${currentTitle}]입니다!`;
+                msg.innerHTML = `🎉 정답입니다! 완성된 그림은 [<b>${currentTitle}</b>]입니다!`;
             } else {
                 msg.style.color = '#c0392b';
-                msg.innerText = '❌ 아직 완성되지 않았거나 틀린 부분이 있습니다. 다시 확인해 보세요!';
+                let errorDetails = '❌ 아직 틀린 라인이 있습니다.<br>';
+                if (wrongRows.length > 0) {
+                    const rowList = wrongRows.map(r => r + 1).join(', ');
+                    errorDetails += `• <b>가로(행)</b>: ${rowList}번째 줄<br>`;
+                }
+                if (wrongCols.length > 0) {
+                    const colList = wrongCols.map(c => c + 1).join(', ');
+                    errorDetails += `• <b>세로(열)</b>: ${colList}번째 줄`;
+                }
+                msg.innerHTML = errorDetails;
             }
         }
 
