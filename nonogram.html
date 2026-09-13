@@ -83,7 +83,7 @@
             line-height: 1.4;
         }
         #board-container {
-            touch-action: none; /* 모바일 터치 드래그 시 브라우저 스크롤 방지 */
+            touch-action: none;
             overflow: auto;
             max-width: 100%;
         }
@@ -131,7 +131,6 @@
             transition: background-color 0.2s, color 0.2s;
         }
 
-        /* 힌트 칸 깜빡임 하이라이트 */
         @keyframes blinkHint {
             0%, 100% {
                 background-color: #eaeded;
@@ -201,7 +200,6 @@
             min-height: 26px;
         }
 
-        /* 2칸 이상 드래그 시 포인터를 따라다니는 카운터 배지 */
         #drag-counter {
             position: fixed;
             display: none;
@@ -323,12 +321,12 @@
         let dragTargetVal = 0;
         let boardSnapshot = [];
         let activeLineCells = [];
+        let touchEventsInitialized = false;
 
         function parseGrid(arr) {
             return arr.map(row => row.split('').map(Number));
         }
 
-        // 55종 고난도 수수께끼 퍼즐 데이터베이스
         const puzzleDatabase = {
             5: [
                 { title: "돛단배", hint: "바람의 숨결을 빌려 푸른 심연의 등뼈를 타넘는 삼각의 방랑자", grid: parseGrid(["01000","01100","01111","11110","00100"]) },
@@ -341,7 +339,6 @@
                 { title: "의자", hint: "네 개의 발을 딛고 서서 오직 남의 무게만을 온전히 짊어지는 침묵의 자리", grid: parseGrid(["11000","11000","11111","11011","10001"]) },
                 { title: "새싹", hint: "어둠의 껍질을 찢고 솟아올라 태양의 빛줄기를 두 팔 벌려 맞이하는 첫 숨", grid: parseGrid(["01100","11101","00111","00100","01110"]) },
                 { title: "비행기", hint: "거대한 쇠의 날개로 대기의 흐름을 가르고 국경의 선을 지워버리는 은빛 새", grid: parseGrid(["00100","01110","11111","00100","01111"]) },
-                // 신규 10개
                 { title: "모래시계", hint: "두 개의 방을 오가며 한 알의 먼지로 영원을 갉아먹는 시간의 감옥", grid: parseGrid(["11111","01110","00100","01110","11111"]) },
                 { title: "버섯", hint: "그늘진 축축함 속에서 피어나 지혜의 모자를 쓰고 홀로 선 균사", grid: parseGrid(["01110","11111","00100","00100","01110"]) },
                 { title: "닻", hint: "거친 파도 속으로 제 몸을 던져 거인의 발목을 바닥에 묶어두는 쇠갈고리", grid: parseGrid(["00100","10101","01110","00100","11111"]) },
@@ -364,7 +361,6 @@
                 { title: "선인장", hint: "타는 갈증을 제 몸 안에 가두고 무수한 가시로 사막의 침략자를 밀어내는 파수꾼", grid: parseGrid(["0001100","1101100","1101111","0111101","0001100","0111110","0011100"]) },
                 { title: "피아노", hint: "흑과 백, 여든여덟 개의 계단을 오르내리며 영혼을 흔드는 울림의 거목", grid: parseGrid(["1111111","1111110","1010110","1111110","1000010","1000010","1101011"]) },
                 { title: "왕관", hint: "피와 권세로 벼려내어 오직 한 사람의 이마만을 허락하는 황금 족쇄", grid: parseGrid(["1001000","1101011","1111111","0111110","0101010","1111111","1111111"]) },
-                // 신규 10개
                 { title: "해마", hint: "말의 머리와 용의 비늘을 품고 바닷말 숲에 꼬리를 감아 숨죽인 기사", grid: parseGrid(["0011000","0111100","0011000","0011100","0001100","0011000","0110000"]) },
                 { title: "다이아몬드", hint: "수억 년 지하의 고열과 압력을 견뎌내고 태어난 지상에서 가장 단단한 빛", grid: parseGrid(["0001000","0011100","0111110","1111111","0111110","0011100","0001000"]) },
                 { title: "등대", hint: "폭풍우 치는 암흑의 수평선에 외눈박이 빛줄기를 쏘아 길 잃은 배를 부르는 기둥", grid: parseGrid(["0001000","0011100","0011100","0111110","0111110","1111111","1111111"]) },
@@ -412,7 +408,6 @@
                     "011111111110000000000","111111111111111111111","000111111111111111110","001111000000000011000","001110000000000001100",
                     "000110000000000000100"
                 ]) },
-                // 신규 10개 (21x21)
                 { title: "해적선", hint: "해골 깃발을 나부끼며 대포의 화염으로 수평선을 피로 물들이던 바다의 약탈자", grid: parseGrid([
                     "000000000100000000000","000000001110000000000","000000011111000000000","000000111111100000000","000001111111110000000",
                     "000000000100000000000","000011100100111000000","000111110101111100000","001111111111111110000","000000000100000000000",
@@ -504,6 +499,15 @@
             document.getElementById('hintText').innerText = `"${selectedPuzzle.hint}"`;
             document.getElementById('message').innerText = '';
 
+            // 드래그 및 UI 상태 완전 초기화
+            isDragging = false;
+            startR = -1;
+            startC = -1;
+            activeLineCells = [];
+            boardSnapshot = [];
+            const counter = document.getElementById('drag-counter');
+            if (counter) counter.style.display = 'none';
+
             clearBlinkErrors();
             playerBoard = Array(size).fill(0).map(() => Array(size).fill(0));
             renderBoard();
@@ -565,12 +569,8 @@
             html += '</table>';
             container.innerHTML = html;
             container.oncontextmenu = (e) => e.preventDefault();
-
-            // 모바일 터치 드래그 이벤트 등록
-            attachTouchEvents(container);
         }
 
-        // 마우스 전용 시작 핸들러
         function handleMouseDown(r, c, event) {
             if (event.button !== 0 && event.button !== 2) return;
             event.preventDefault();
@@ -579,7 +579,6 @@
             startDrag(r, c, event.clientX, event.clientY, isRightClick);
         }
 
-        // 터치 및 마우스 공용 드래그 개시
         function startDrag(r, c, clientX, clientY, isSecondaryAction) {
             clearBlinkErrors();
             isDragging = true;
@@ -600,14 +599,12 @@
                 dragTargetVal = (curVal === -1) ? 0 : -1;
             }
 
-            // 1칸일 때는 카운터 숨김
             const counter = document.getElementById('drag-counter');
             if (counter) counter.style.display = 'none';
 
             updateLine(r, c, clientX, clientY);
         }
 
-        // 직선 투영 및 카운터 실시간 갱신
         function updateLine(curR, curC, clientX, clientY) {
             const dr = Math.abs(curR - startR);
             const dc = Math.abs(curC - startC);
@@ -627,14 +624,12 @@
                 }
             }
 
-            // 직전 궤적 복원
             for (let cell of activeLineCells) {
                 const origVal = boardSnapshot[cell.r][cell.c];
                 playerBoard[cell.r][cell.c] = origVal;
                 updateCellDOM(cell.r, cell.c, origVal);
             }
 
-            // 신규 궤적 반영
             for (let cell of lineCells) {
                 playerBoard[cell.r][cell.c] = dragTargetVal;
                 updateCellDOM(cell.r, cell.c, dragTargetVal);
@@ -642,7 +637,6 @@
 
             activeLineCells = lineCells;
 
-            // 2개 이상일 때만 포인터 위치를 따라다니며 숫자 카운트 표시
             const counter = document.getElementById('drag-counter');
             if (counter) {
                 if (lineCells.length >= 2) {
@@ -666,7 +660,6 @@
             if (val === -1) el.classList.add('marked');
         }
 
-        // PC 마우스 추적 이벤트
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const counter = document.getElementById('drag-counter');
@@ -690,8 +683,13 @@
             }
         });
 
-        // 모바일 터치 연속 드래그 제어
-        function attachTouchEvents(container) {
+        // 모바일 터치 이벤트 1회 안전 초기화
+        function initTouchEventsOnce() {
+            if (touchEventsInitialized) return;
+            touchEventsInitialized = true;
+
+            const container = document.getElementById('board-container');
+
             container.addEventListener('touchstart', (e) => {
                 if (e.touches.length > 1) return;
                 const touch = e.touches[0];
@@ -721,7 +719,8 @@
                 }
             }, { passive: false });
 
-            const touchEndHandler = () => {
+            // 손가락을 어디서 떼든 확실히 드래그가 종료되도록 window에 바인딩
+            const endTouch = () => {
                 if (isDragging) {
                     isDragging = false;
                     const counter = document.getElementById('drag-counter');
@@ -729,11 +728,10 @@
                 }
             };
 
-            container.addEventListener('touchend', touchEndHandler);
-            container.addEventListener('touchcancel', touchEndHandler);
+            window.addEventListener('touchend', endTouch);
+            window.addEventListener('touchcancel', endTouch);
         }
 
-        // 정답 검증 및 틀린 라인 깜빡임 트리거
         function checkAnswer() {
             const msg = document.getElementById('message');
             clearBlinkErrors();
@@ -779,7 +777,10 @@
             }
         }
 
-        window.onload = initGame;
+        window.onload = () => {
+            initGame();
+            initTouchEventsOnce();
+        };
     </script>
 </body>
 </html>
