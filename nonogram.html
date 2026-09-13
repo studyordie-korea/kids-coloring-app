@@ -111,6 +111,16 @@
             height: 30px;
             font-size: 0.78rem;
         }
+        .nonogram-table.size-10 td {
+            width: 25px;
+            height: 25px;
+            font-size: 0.72rem;
+        }
+        .nonogram-table.size-10 .hint-cell {
+            font-size: 0.7rem;
+            line-height: 1.1;
+            padding: 1px 2px;
+        }
         .nonogram-table.size-21 td {
             width: 17px;
             height: 17px;
@@ -164,6 +174,9 @@
             content: '✕';
             color: #e74c3c;
             font-size: 1rem;
+        }
+        .nonogram-table.size-10 .play-cell.marked::after {
+            font-size: 0.88rem;
         }
         .nonogram-table.size-21 .play-cell.marked::after {
             font-size: 0.75rem;
@@ -227,22 +240,34 @@
 
     <div class="controls">
         <select id="stageSelect" onchange="initGame()">
+            <optgroup label="⭐ 10 x 10 퍼즐 (신규 정예 10제)">
+                <option value="10_0" selected>10x10 - 퍼즐 01</option>
+                <option value="10_1">10x10 - 퍼즐 02</option>
+                <option value="10_2">10x10 - 퍼즐 03</option>
+                <option value="10_3">10x10 - 퍼즐 04</option>
+                <option value="10_4">10x10 - 퍼즐 05</option>
+                <option value="10_5">10x10 - 퍼즐 06</option>
+                <option value="10_6">10x10 - 퍼즐 07</option>
+                <option value="10_7">10x10 - 퍼즐 08</option>
+                <option value="10_8">10x10 - 퍼즐 09</option>
+                <option value="10_9">10x10 - 퍼즐 10</option>
+            </optgroup>
             <optgroup label="👑 21 x 21 퍼즐 (마스터 15제)">
-                <option value="21_0" selected>21x21 - 퍼즐 01</option>
+                <option value="21_0">21x21 - 퍼즐 01</option>
                 <option value="21_1">21x21 - 퍼즐 02</option>
                 <option value="21_2">21x21 - 퍼즐 03</option>
                 <option value="21_3">21x21 - 퍼즐 04</option>
                 <option value="21_4">21x21 - 퍼즐 05</option>
-                <option value="21_5">21x21 - 퍼즐 06 (신규)</option>
-                <option value="21_6">21x21 - 퍼즐 07 (신규)</option>
-                <option value="21_7">21x21 - 퍼즐 08 (신규)</option>
-                <option value="21_8">21x21 - 퍼즐 09 (신규)</option>
-                <option value="21_9">21x21 - 퍼즐 10 (신규)</option>
-                <option value="21_10">21x21 - 퍼즐 11 (신규)</option>
-                <option value="21_11">21x21 - 퍼즐 12 (신규)</option>
-                <option value="21_12">21x21 - 퍼즐 13 (신규)</option>
-                <option value="21_13">21x21 - 퍼즐 14 (신규)</option>
-                <option value="21_14">21x21 - 퍼즐 15 (신규)</option>
+                <option value="21_5">21x21 - 퍼즐 06</option>
+                <option value="21_6">21x21 - 퍼즐 07</option>
+                <option value="21_7">21x21 - 퍼즐 08</option>
+                <option value="21_8">21x21 - 퍼즐 09</option>
+                <option value="21_9">21x21 - 퍼즐 10</option>
+                <option value="21_10">21x21 - 퍼즐 11</option>
+                <option value="21_11">21x21 - 퍼즐 12</option>
+                <option value="21_12">21x21 - 퍼즐 13</option>
+                <option value="21_13">21x21 - 퍼즐 14</option>
+                <option value="21_14">21x21 - 퍼즐 15</option>
             </optgroup>
             <optgroup label="🌿 7 x 7 퍼즐 (도전 20제)">
                 <option value="7_0">7x7 - 퍼즐 01</option>
@@ -255,16 +280,16 @@
                 <option value="7_7">7x7 - 퍼즐 08</option>
                 <option value="7_8">7x7 - 퍼즐 09</option>
                 <option value="7_9">7x7 - 퍼즐 10</option>
-                <option value="7_10">7x7 - 퍼즐 11 (신규)</option>
-                <option value="7_11">7x7 - 퍼즐 12 (신규)</option>
-                <option value="7_12">7x7 - 퍼즐 13 (신규)</option>
-                <option value="7_13">7x7 - 퍼즐 14 (신규)</option>
-                <option value="7_14">7x7 - 퍼즐 15 (신규)</option>
-                <option value="7_15">7x7 - 퍼즐 16 (신규)</option>
-                <option value="7_16">7x7 - 퍼즐 17 (신규)</option>
-                <option value="7_17">7x7 - 퍼즐 18 (신규)</option>
-                <option value="7_18">7x7 - 퍼즐 19 (신규)</option>
-                <option value="7_19">7x7 - 퍼즐 20 (신규)</option>
+                <option value="7_10">7x7 - 퍼즐 11</option>
+                <option value="7_11">7x7 - 퍼즐 12</option>
+                <option value="7_12">7x7 - 퍼즐 13</option>
+                <option value="7_13">7x7 - 퍼즐 14</option>
+                <option value="7_14">7x7 - 퍼즐 15</option>
+                <option value="7_15">7x7 - 퍼즐 16</option>
+                <option value="7_16">7x7 - 퍼즐 17</option>
+                <option value="7_17">7x7 - 퍼즐 18</option>
+                <option value="7_18">7x7 - 퍼즐 19</option>
+                <option value="7_19">7x7 - 퍼즐 20</option>
             </optgroup>
             <optgroup label="🌱 5 x 5 퍼즐 (입문 20제)">
                 <option value="5_0">5x5 - 퍼즐 01</option>
@@ -277,16 +302,16 @@
                 <option value="5_7">5x5 - 퍼즐 08</option>
                 <option value="5_8">5x5 - 퍼즐 09</option>
                 <option value="5_9">5x5 - 퍼즐 10</option>
-                <option value="5_10">5x5 - 퍼즐 11 (신규)</option>
-                <option value="5_11">5x5 - 퍼즐 12 (신규)</option>
-                <option value="5_12">5x5 - 퍼즐 13 (신규)</option>
-                <option value="5_13">5x5 - 퍼즐 14 (신규)</option>
-                <option value="5_14">5x5 - 퍼즐 15 (신규)</option>
-                <option value="5_15">5x5 - 퍼즐 16 (신규)</option>
-                <option value="5_16">5x5 - 퍼즐 17 (신규)</option>
-                <option value="5_17">5x5 - 퍼즐 18 (신규)</option>
-                <option value="5_18">5x5 - 퍼즐 19 (신규)</option>
-                <option value="5_19">5x5 - 퍼즐 20 (신규)</option>
+                <option value="5_10">5x5 - 퍼즐 11</option>
+                <option value="5_11">5x5 - 퍼즐 12</option>
+                <option value="5_12">5x5 - 퍼즐 13</option>
+                <option value="5_13">5x5 - 퍼즐 14</option>
+                <option value="5_14">5x5 - 퍼즐 15</option>
+                <option value="5_15">5x5 - 퍼즐 16</option>
+                <option value="5_16">5x5 - 퍼즐 17</option>
+                <option value="5_17">5x5 - 퍼즐 18</option>
+                <option value="5_18">5x5 - 퍼즐 19</option>
+                <option value="5_19">5x5 - 퍼즐 20</option>
             </optgroup>
         </select>
         <button onclick="initGame()">다시 시작</button>
@@ -309,7 +334,7 @@
     <div class="message" id="message"></div>
 
     <script>
-        let size = 21;
+        let size = 10;
         let solution = [];
         let playerBoard = [];
         let currentMode = 'fill';
@@ -371,6 +396,128 @@
                 { title: "거미", hint: "공중에 투명한 그물을 엮어 제 진동에 걸려든 운명을 기다리는 팔척의 직조공", grid: parseGrid(["1000001","0101010","0011100","1111111","0011100","0101010","1000001"]) },
                 { title: "모아이", hint: "망망대해를 등지고 서서 묵묵히 섬의 비밀을 삼킨 채 영원을 응시하는 석상", grid: parseGrid(["0111100","0111100","0110000","0111100","0110000","0111110","1111111"]) },
                 { title: "화살", hint: "한 번 시위를 떠나면 뒤돌아보지 않고 오직 과녁의 심장만을 파고드는 직선의 비수", grid: parseGrid(["0000001","0000011","0000101","0001000","0010000","0100000","1000000"]) }
+            ],
+            10: [
+                { title: "돌고래", hint: "지느러미를 달고 푸른 심연을 가르지만 아가미 대신 폐로 바다의 하늘을 들이쉬는 은빛 포유류", grid: parseGrid([
+                    "0000111000",
+                    "0001111100",
+                    "0011111110",
+                    "0111011111",
+                    "1111111110",
+                    "0111111100",
+                    "0001111000",
+                    "0000110110",
+                    "0000100111",
+                    "0000000011"
+                ]) },
+                { title: "체스 나이트", hint: "직선의 규칙을 비웃으며 보이지 않는 장벽을 뛰어넘어 L자로 사냥하는 흑백 판 위의 군마", grid: parseGrid([
+                    "0001111000",
+                    "0011111100",
+                    "0111111100",
+                    "1110011100",
+                    "1100111100",
+                    "0001111100",
+                    "0000111110",
+                    "0000111110",
+                    "0001111111",
+                    "0011111111"
+                ]) },
+                { title: "카메라", hint: "찰나의 빛을 어둠의 상자 속에 가두어 흘러가는 시간을 영원의 침묵으로 박제하는 기계", grid: parseGrid([
+                    "0011000000",
+                    "0011000110",
+                    "1111111110",
+                    "1110011111",
+                    "1100000111",
+                    "1101100111",
+                    "1101100111",
+                    "1100000111",
+                    "1110011111",
+                    "1111111110"
+                ]) },
+                { title: "열기구", hint: "거대한 비단 주머니에 불꽃의 숨결을 불어넣어 바람의 뜻대로 하늘을 유랑하는 바구니", grid: parseGrid([
+                    "0000111100",
+                    "0001111110",
+                    "0011111111",
+                    "0011111111",
+                    "0001111110",
+                    "0000111100",
+                    "1100011000",
+                    "1110011000",
+                    "1111011110",
+                    "0110000000"
+                ]) },
+                { title: "부엉이", hint: "모두가 잠든 암흑 속에서 목을 돌려 진실을 꿰뚫어 보며 지혜의 눈을 번뜩이는 밤의 영물", grid: parseGrid([
+                    "0110001100",
+                    "1111011110",
+                    "1011111010",
+                    "1111111100",
+                    "0111111110",
+                    "0111111111",
+                    "0011111111",
+                    "1111111111",
+                    "0011001100",
+                    "0000001100"
+                ]) },
+                { title: "촛대", hint: "제 몸을 녹여 눈물로 흘리면서도 어둠의 심장에 붉은 불꽃 하나를 꼿꼿이 세운 제단", grid: parseGrid([
+                    "0000100000",
+                    "0001110000",
+                    "0001110000",
+                    "0000100000",
+                    "0011111000",
+                    "0011111000",
+                    "0111111000",
+                    "0101111010",
+                    "0001111110",
+                    "1111111111"
+                ]) },
+                { title: "망원경", hint: "둥근 유리알 두 개를 겹쳐 수억 광년 저편의 과거를 인간의 눈동자 앞으로 당겨오는 원통", grid: parseGrid([
+                    "0000000111",
+                    "0000001111",
+                    "0000011111",
+                    "0000111110",
+                    "0001111000",
+                    "0001111000",
+                    "0011101100",
+                    "0111000110",
+                    "1110000011",
+                    "1100000001"
+                ]) },
+                { title: "만년필", hint: "검은 피를 심장까지 머금고 종이라는 순백의 대지에 영혼의 사유를 새겨나가는 금빛 부리", grid: parseGrid([
+                    "0000000011",
+                    "0000000111",
+                    "0000001111",
+                    "0000011110",
+                    "0000111100",
+                    "0001111000",
+                    "0011110000",
+                    "0111100000",
+                    "1110000000",
+                    "1111111111"
+                ]) },
+                { title: "열대어", hint: "산호초 미로 속을 유영하며 오색찬란한 지느러미로 바다의 꽃잎이 되어 흔들리는 작은 생명", grid: parseGrid([
+                    "0000110000",
+                    "0001111000",
+                    "0011111100",
+                    "0111111110",
+                    "1101111111",
+                    "1111111011",
+                    "0111111111",
+                    "0011111100",
+                    "0001111000",
+                    "0001100000"
+                ]) },
+                { title: "마법 모자", hint: "별과 달의 문양을 수놓은 채 뾰족한 끝을 구부리고 침묵의 지혜를 머리 위에 얹는 고깔", grid: parseGrid([
+                    "0000011000",
+                    "0000111100",
+                    "0000111000",
+                    "0001111000",
+                    "0001111000",
+                    "0011111100",
+                    "0011111110",
+                    "0111111110",
+                    "1111111111",
+                    "0111111110"
+                ]) }
             ],
             21: [
                 { title: "브라키오사우루스", hint: "대륙이 갈라지기 전, 구름 아래 가장 높은 나뭇가지를 꺾어 삼키던 태고의 기둥", grid: parseGrid([
@@ -499,7 +646,6 @@
             document.getElementById('hintText').innerText = `"${selectedPuzzle.hint}"`;
             document.getElementById('message').innerText = '';
 
-            // 드래그 및 UI 상태 완전 초기화
             isDragging = false;
             startR = -1;
             startC = -1;
@@ -683,7 +829,6 @@
             }
         });
 
-        // 모바일 터치 이벤트 1회 안전 초기화
         function initTouchEventsOnce() {
             if (touchEventsInitialized) return;
             touchEventsInitialized = true;
@@ -719,7 +864,6 @@
                 }
             }, { passive: false });
 
-            // 손가락을 어디서 떼든 확실히 드래그가 종료되도록 window에 바인딩
             const endTouch = () => {
                 if (isDragging) {
                     isDragging = false;
