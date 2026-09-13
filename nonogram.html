@@ -65,6 +65,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             max-width: 100%;
             overflow: auto;
+            position: relative;
         }
         .hint-banner {
             background-color: #fef9e7;
@@ -90,7 +91,7 @@
             padding: 0;
             user-select: none;
         }
-        /* 5x5 및 7x7 기본 셀 크기 */
+        /* 보드 크기별 셀 규격 */
         .nonogram-table.size-5 td {
             width: 34px;
             height: 34px;
@@ -101,7 +102,6 @@
             height: 28px;
             font-size: 0.78rem;
         }
-        /* 21x21 전용 컴팩트 셀 크기 */
         .nonogram-table.size-21 td {
             width: 18px;
             height: 18px;
@@ -168,9 +168,30 @@
             text-align: center;
             min-height: 26px;
         }
+
+        /* 마우스를 따라다니는 드래그 칸 수 카운터 배지 */
+        #drag-counter {
+            position: fixed;
+            display: none;
+            pointer-events: none;
+            background-color: #e74c3c;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 0.88rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            z-index: 10000;
+            transform: translate(14px, -24px);
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
+
+    <!-- 마우스 추적 카운터 배지 -->
+    <div id="drag-counter">1</div>
 
     <h1>🧩 네모네모 로직 (노노그램)</h1>
     <p class="subtitle">수수께끼 힌트를 풀며 그림을 완성해 보세요!</p>
@@ -222,7 +243,7 @@
             <button class="mode-btn active" id="modeFill" onclick="setMode('fill')">✏️ 채우기 (■)</button>
             <button class="mode-btn" id="modeMark" onclick="setMode('mark')">❌ X표시 (X)</button>
         </div>
-        <div class="tip-text">마우스 드래그로 연속 선택 / 우클릭 시 반대 모드로 즉시 동작</div>
+        <div class="tip-text">마우스 드래그 시 칸 수가 숫자로 표시됩니다 (가로·세로 직선 고정)</div>
         <div id="board-container"></div>
     </div>
 
@@ -235,8 +256,13 @@
         let currentMode = 'fill';
         let currentTitle = '';
         
+        // 정밀 직선 드래그 & 카운팅 제어 변수
         let isDragging = false;
+        let startR = -1;
+        let startC = -1;
         let dragTargetVal = 0;
+        let boardSnapshot = [];
+        let activeLineCells = [];
 
         const puzzleDatabase = {
             5: [
@@ -484,7 +510,6 @@
                 }
             ],
             21: [
-                // 21x21 - 1. 브라키오사우루스
                 {
                     title: "브라키오사우루스",
                     hint: "목이 아주 길고 거대한 초식 공룡이에요.",
@@ -512,7 +537,6 @@
                         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                     ]
                 },
-                // 21x21 - 2. 중세 성
                 {
                     title: "중세 성",
                     hint: "돌로 쌓은 탑과 펄럭이는 깃발이 있는 요새예요.",
@@ -540,7 +564,6 @@
                         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                     ]
                 },
-                // 21x21 - 3. 우주 로켓
                 {
                     title: "우주 로켓",
                     hint: "불꽃을 뿜으며 머나먼 우주로 날아가는 탐사선이에요.",
@@ -568,7 +591,6 @@
                         [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
                     ]
                 },
-                // 21x21 - 4. 통기타
                 {
                     title: "통기타",
                     hint: "여섯 개의 줄을 튕겨 아름다운 화음을 만드는 악기예요.",
@@ -596,7 +618,6 @@
                         [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
                     ]
                 },
-                // 21x21 - 5. 토코투칸
                 {
                     title: "토코투칸",
                     hint: "몸집보다 큰 무지갯빛 부리를 가진 열대 정글의 새예요.",
@@ -702,11 +723,19 @@
             container.oncontextmenu = (e) => e.preventDefault();
         }
 
+        // 마우스 드래그 시작 및 카운터 초기화
         function startDrag(r, c, event) {
             if (event.button !== 0 && event.button !== 2) return;
             event.preventDefault();
 
             isDragging = true;
+            startR = r;
+            startC = c;
+            activeLineCells = [];
+
+            // 드래그 시작 시점의 보드 스냅샷 복사
+            boardSnapshot = playerBoard.map(row => [...row]);
+
             let activeMode = currentMode;
             if (event.button === 2) {
                 activeMode = (currentMode === 'fill') ? 'mark' : 'fill';
@@ -719,26 +748,88 @@
                 dragTargetVal = (curVal === -1) ? 0 : -1;
             }
 
-            applyCell(r, c, dragTargetVal);
+            // 카운터 배지 노출 및 위치 설정
+            const counter = document.getElementById('drag-counter');
+            counter.innerText = '1';
+            counter.style.left = `${event.clientX}px`;
+            counter.style.top = `${event.clientY}px`;
+            counter.style.display = 'block';
+
+            updateLine(r, c);
         }
 
+        // 드래그 이동 시 칸 수 계산 및 직선 보정
         function dragOver(r, c) {
             if (!isDragging) return;
-            applyCell(r, c, dragTargetVal);
+            updateLine(r, c);
         }
 
-        function applyCell(r, c, val) {
-            playerBoard[r][c] = val;
-            const cell = document.getElementById(`cell-${r}-${c}`);
-            if (!cell) return;
+        // 가로/세로 직선 고정 및 실시간 칸 수 갱신 로직
+        function updateLine(curR, curC) {
+            const dr = Math.abs(curR - startR);
+            const dc = Math.abs(curC - startC);
 
-            cell.className = 'play-cell';
-            if (val === 1) cell.classList.add('filled');
-            if (val === -1) cell.classList.add('marked');
+            let lineCells = [];
+            // 가로 이동 폭이 크면 가로 직선, 세로 이동 폭이 크면 세로 직선으로 빗겨나감 방지
+            if (dc >= dr) {
+                const minC = Math.min(startC, curC);
+                const maxC = Math.max(startC, curC);
+                for (let c = minC; c <= maxC; c++) {
+                    lineCells.push({r: startR, c: c});
+                }
+            } else {
+                const minR = Math.min(startR, curR);
+                const maxR = Math.max(startR, curR);
+                for (let r = minR; r <= maxR; r++) {
+                    lineCells.push({r: r, c: startC});
+                }
+            }
+
+            // 직전 드래그 경로를 원래 상태로 복원
+            for (let cell of activeLineCells) {
+                const origVal = boardSnapshot[cell.r][cell.c];
+                playerBoard[cell.r][cell.c] = origVal;
+                updateCellDOM(cell.r, cell.c, origVal);
+            }
+
+            // 현재 유효 직선에 타깃 값 적용
+            for (let cell of lineCells) {
+                playerBoard[cell.r][cell.c] = dragTargetVal;
+                updateCellDOM(cell.r, cell.c, dragTargetVal);
+            }
+
+            activeLineCells = lineCells;
+
+            // 실시간 카운트 갱신
+            const counter = document.getElementById('drag-counter');
+            if (counter) {
+                counter.innerText = lineCells.length;
+            }
         }
 
+        function updateCellDOM(r, c, val) {
+            const el = document.getElementById(`cell-${r}-${c}`);
+            if (!el) return;
+            el.className = 'play-cell';
+            if (val === 1) el.classList.add('filled');
+            if (val === -1) el.classList.add('marked');
+        }
+
+        // 마우스 커서 위치를 실시간으로 따라다니는 이벤트
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const counter = document.getElementById('drag-counter');
+            counter.style.left = `${e.clientX}px`;
+            counter.style.top = `${e.clientY}px`;
+        });
+
+        // 드래그 종료 시 카운터 숨김
         window.addEventListener('mouseup', () => {
-            isDragging = false;
+            if (isDragging) {
+                isDragging = false;
+                const counter = document.getElementById('drag-counter');
+                if (counter) counter.style.display = 'none';
+            }
         });
 
         function checkAnswer() {
