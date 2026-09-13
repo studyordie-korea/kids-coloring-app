@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 네모네모 로직 (무결점 11x11 에디션)</title>
+    <title>스마트 네모네모 로직 (5x5 & 7x7 20제 에디션)</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -26,11 +26,11 @@
         p.subtitle {
             color: #7f8c8d;
             font-size: 0.9rem;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
         }
         .controls {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -58,13 +58,26 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             background: white;
-            padding: 18px;
+            padding: 16px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             max-width: 100%;
             overflow: auto;
+        }
+        /* 수수께끼 힌트 배너 */
+        .hint-banner {
+            background-color: #fef9e7;
+            border: 1px solid #f9e79f;
+            color: #7d6608;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         table.nonogram-table {
             border-collapse: collapse;
@@ -72,11 +85,11 @@
         }
         .nonogram-table td {
             border: 1px solid #bdc3c7;
-            width: 27px;
-            height: 27px;
+            width: 32px;
+            height: 32px;
             text-align: center;
             vertical-align: middle;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: bold;
             padding: 0;
             user-select: none;
@@ -86,8 +99,8 @@
             color: #34495e;
             font-family: monospace;
             white-space: pre-wrap;
-            line-height: 1.1;
-            font-size: 0.72rem;
+            line-height: 1.15;
+            font-size: 0.75rem;
         }
         .play-cell {
             background-color: #ffffff;
@@ -103,7 +116,7 @@
         .play-cell.marked::after {
             content: '✕';
             color: #e74c3c;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
         }
         .mode-selector {
             display: flex;
@@ -126,34 +139,46 @@
         .tip-text {
             font-size: 0.8rem;
             color: #95a5a6;
-            margin-top: -5px;
         }
         .message {
-            margin-top: 12px;
-            font-size: 1rem;
+            margin-top: 10px;
+            font-size: 1.05rem;
             font-weight: bold;
             text-align: center;
-            min-height: 24px;
+            min-height: 26px;
         }
     </style>
 </head>
 <body>
 
-    <h1>🧩 네모네모 로직 (무결점 퍼즐)</h1>
-    <p class="subtitle">단 하나의 유일한 정답만 존재하는 11x11 고난도 퍼즐 모음</p>
+    <h1>🧩 네모네모 로직 (노노그램)</h1>
+    <p class="subtitle">수수께끼 힌트를 풀며 그림을 완성해 보세요!</p>
 
     <div class="controls">
         <select id="stageSelect" onchange="initGame()">
-            <optgroup label="11x11 고난도 퍼즐 (신규)">
-                <option value="11_0" selected>1. 주전자 (Teapot)</option>
-                <option value="11_1">2. 밤바다 등대 (Lighthouse)</option>
-                <option value="11_2">3. 달리는 강아지 (Puppy)</option>
-                <option value="11_3">4. 구름과 열기구 (Hot Balloon)</option>
-                <option value="11_4">5. 횃대 위 앵무새 (Parrot)</option>
+            <optgroup label="🌱 5 x 5 퍼즐 (입문 10제)">
+                <option value="5_0" selected>5x5 - 퍼즐 01</option>
+                <option value="5_1">5x5 - 퍼즐 02</option>
+                <option value="5_2">5x5 - 퍼즐 03</option>
+                <option value="5_3">5x5 - 퍼즐 04</option>
+                <option value="5_4">5x5 - 퍼즐 05</option>
+                <option value="5_5">5x5 - 퍼즐 06</option>
+                <option value="5_6">5x5 - 퍼즐 07</option>
+                <option value="5_7">5x5 - 퍼즐 08</option>
+                <option value="5_8">5x5 - 퍼즐 09</option>
+                <option value="5_9">5x5 - 퍼즐 10</option>
             </optgroup>
-            <optgroup label="5x5 연습용">
-                <option value="5_0">돛단배</option>
-                <option value="5_1">오리</option>
+            <optgroup label="🌿 7 x 7 퍼즐 (도전 10제)">
+                <option value="7_0">7x7 - 퍼즐 01</option>
+                <option value="7_1">7x7 - 퍼즐 02</option>
+                <option value="7_2">7x7 - 퍼즐 03</option>
+                <option value="7_3">7x7 - 퍼즐 04</option>
+                <option value="7_4">7x7 - 퍼즐 05</option>
+                <option value="7_5">7x7 - 퍼즐 06</option>
+                <option value="7_6">7x7 - 퍼즐 07</option>
+                <option value="7_7">7x7 - 퍼즐 08</option>
+                <option value="7_8">7x7 - 퍼즐 09</option>
+                <option value="7_9">7x7 - 퍼즐 10</option>
             </optgroup>
         </select>
         <button onclick="initGame()">다시 시작</button>
@@ -161,127 +186,293 @@
     </div>
 
     <div class="game-layout">
+        <!-- 수수께끼 힌트 표시 영역 -->
+        <div class="hint-banner" id="hintBanner">
+            <span>💡 힌트:</span> <span id="hintText">로딩 중...</span>
+        </div>
+
         <div class="mode-selector">
             <button class="mode-btn active" id="modeFill" onclick="setMode('fill')">✏️ 채우기 (■)</button>
             <button class="mode-btn" id="modeMark" onclick="setMode('mark')">❌ X표시 (X)</button>
         </div>
-        <div class="tip-text">💡 마우스 좌클릭 드래그로 연속 칠하기 / 우클릭 시 반대 모드로 작동</div>
+        <div class="tip-text">마우스 드래그로 연속 선택 / 우클릭 시 반대 모드로 즉시 동작</div>
         <div id="board-container"></div>
     </div>
 
     <div class="message" id="message"></div>
 
     <script>
-        let size = 11;
+        let size = 5;
         let solution = [];
         let playerBoard = [];
         let currentMode = 'fill';
+        let currentTitle = '';
         
-        // 드래그 제어 변수
+        // 드래그 제어
         let isDragging = false;
         let dragTargetVal = 0;
 
-        // 검증 완료된 무결점 패턴 (0 힌트 없음, 대칭 배제, 단일 정답 보장)
-        const puzzles = {
+        // 검증 완료된 20개 퍼즐 데이터 (단일 정답, 0 힌트 없음, 대칭 배제)
+        const puzzleDatabase = {
             5: [
-                // 돛단배
-                [
-                    [0, 1, 0, 0, 0],
-                    [0, 1, 1, 0, 0],
-                    [0, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 0],
-                    [0, 0, 1, 0, 0]
-                ],
-                // 오리
-                [
-                    [0, 1, 1, 0, 0],
-                    [1, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 1],
-                    [0, 1, 1, 1, 1],
-                    [0, 0, 1, 1, 0]
-                ]
+                {
+                    title: "돛단배",
+                    hint: "바람을 받으며 바다 위를 항해해요.",
+                    grid: [
+                        [0, 1, 0, 0, 0],
+                        [0, 1, 1, 0, 0],
+                        [0, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 0],
+                        [0, 0, 1, 0, 0]
+                    ]
+                },
+                {
+                    title: "오리",
+                    hint: "물 위를 둥둥 떠다니는 노란 부리의 새예요.",
+                    grid: [
+                        [0, 1, 1, 0, 0],
+                        [1, 1, 1, 0, 0],
+                        [0, 0, 1, 1, 1],
+                        [0, 1, 1, 1, 1],
+                        [0, 0, 1, 1, 0]
+                    ]
+                },
+                {
+                    title: "열쇠",
+                    hint: "굳게 닫힌 자물쇠를 열 때 필요해요.",
+                    grid: [
+                        [0, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 0],
+                        [0, 0, 1, 0, 0],
+                        [0, 0, 1, 1, 0],
+                        [0, 0, 1, 1, 1]
+                    ]
+                },
+                {
+                    title: "계단",
+                    hint: "위층과 아래층을 걸어서 오르내리는 곳이에요.",
+                    grid: [
+                        [1, 1, 0, 0, 0],
+                        [1, 1, 1, 1, 0],
+                        [0, 1, 1, 1, 1],
+                        [0, 0, 1, 1, 1],
+                        [0, 0, 0, 1, 1]
+                    ]
+                },
+                {
+                    title: "머그컵",
+                    hint: "손잡이가 달린 컵에 따뜻한 커피나 차를 담아요.",
+                    grid: [
+                        [1, 1, 1, 1, 0],
+                        [1, 0, 0, 1, 1],
+                        [1, 0, 0, 1, 1],
+                        [1, 1, 1, 1, 0],
+                        [0, 1, 1, 0, 0]
+                    ]
+                },
+                {
+                    title: "우산",
+                    hint: "비가 주룩주룩 내릴 때 머리 위로 펼쳐요.",
+                    grid: [
+                        [0, 1, 1, 1, 0],
+                        [1, 1, 1, 1, 1],
+                        [0, 0, 1, 0, 0],
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 1, 0, 0]
+                    ]
+                },
+                {
+                    title: "음표",
+                    hint: "노래와 멜로디를 오선지에 그릴 때 써요.",
+                    grid: [
+                        [0, 0, 1, 1, 1],
+                        [0, 0, 1, 0, 1],
+                        [0, 0, 1, 0, 1],
+                        [1, 1, 1, 0, 1],
+                        [1, 1, 0, 1, 1]
+                    ]
+                },
+                {
+                    title: "의자",
+                    hint: "등을 기대고 편안하게 앉는 가구예요.",
+                    grid: [
+                        [1, 1, 0, 0, 0],
+                        [1, 1, 0, 0, 0],
+                        [1, 1, 1, 1, 1],
+                        [1, 1, 0, 1, 1],
+                        [1, 0, 0, 0, 1]
+                    ]
+                },
+                {
+                    title: "새싹",
+                    hint: "봄이 되면 땅속에서 돋아나는 파릇파릇한 잎이에요.",
+                    grid: [
+                        [0, 1, 1, 0, 0],
+                        [1, 1, 1, 0, 1],
+                        [0, 0, 1, 1, 1],
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 1, 1, 0]
+                    ]
+                },
+                {
+                    title: "비행기",
+                    hint: "하늘을 높이 날아 먼 나라로 데려다줘요.",
+                    grid: [
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 1, 1, 0],
+                        [1, 1, 1, 1, 1],
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 1, 1, 1]
+                    ]
+                }
             ],
-            11: [
-                // 1. 따뜻한 주전자 (손잡이와 주구, 받침대)
-                [
-                    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1],
-                    [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-                ],
-                // 2. 밤바다 등대 (빛 줄기와 절벽)
-                [
-                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1],
-                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-                ],
-                // 3. 달리는 강아지 (귀, 주둥이, 꼬리, 달리는 다리)
-                [
-                    [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0],
-                    [0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0],
-                    [1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1],
-                    [1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-                    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
-                ],
-                // 4. 구름과 열기구 (기구와 비대칭 구름 배치)
-                [
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1],
-                    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1],
-                    [1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
-                ],
-                // 5. 횃대 위 앵무새 (부리, 날개, 나뭇가지와 잎)
-                [
-                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1],
-                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1],
-                    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
-                ]
+            7: [
+                {
+                    title: "요트",
+                    hint: "하얀 돛을 달고 파도를 가르며 나아가요.",
+                    grid: [
+                        [0, 0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 1, 0, 0, 0],
+                        [0, 1, 1, 1, 1, 0, 0],
+                        [0, 0, 1, 0, 0, 0, 0],
+                        [1, 1, 1, 1, 1, 1, 0],
+                        [0, 1, 1, 1, 1, 0, 0],
+                        [1, 1, 0, 1, 1, 0, 1]
+                    ]
+                },
+                {
+                    title: "커피잔",
+                    hint: "모락모락 김이 피어오르는 향긋한 휴식 시간.",
+                    grid: [
+                        [0, 1, 0, 1, 0, 0, 0],
+                        [0, 0, 1, 0, 1, 0, 0],
+                        [1, 1, 1, 1, 1, 1, 0],
+                        [1, 1, 1, 1, 1, 0, 1],
+                        [1, 1, 1, 1, 1, 0, 1],
+                        [0, 1, 1, 1, 0, 1, 1],
+                        [0, 1, 1, 1, 1, 1, 0]
+                    ]
+                },
+                {
+                    title: "사과",
+                    hint: "싱그러운 나뭇잎이 달린 새콤달콤한 붉은 과일이에요.",
+                    grid: [
+                        [0, 0, 0, 1, 1, 0, 0],
+                        [0, 0, 1, 0, 1, 0, 0],
+                        [0, 1, 1, 1, 1, 1, 0],
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 0],
+                        [0, 1, 1, 0, 1, 1, 0]
+                    ]
+                },
+                {
+                    title: "보물 열쇠",
+                    hint: "비밀스러운 보물 상자를 열 수 있는 금빛 열쇠예요.",
+                    grid: [
+                        [0, 1, 1, 1, 0, 0, 0],
+                        [1, 1, 0, 1, 1, 0, 0],
+                        [1, 1, 0, 1, 1, 0, 0],
+                        [0, 1, 1, 1, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 1, 1, 0, 0],
+                        [0, 0, 1, 1, 1, 1, 1]
+                    ]
+                },
+                {
+                    title: "달팽이",
+                    hint: "둥글고 단단한 집을 등에 업고 천천히 기어가요.",
+                    grid: [
+                        [0, 0, 1, 1, 1, 0, 0],
+                        [0, 1, 1, 0, 1, 1, 0],
+                        [0, 1, 0, 1, 1, 1, 0],
+                        [0, 1, 1, 1, 1, 0, 0],
+                        [0, 0, 1, 1, 0, 1, 0],
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [0, 1, 1, 1, 1, 1, 0]
+                    ]
+                },
+                {
+                    title: "헬리콥터",
+                    hint: "머리 위에 달린 거대한 회전 날개로 제자리 비행을 해요.",
+                    grid: [
+                        [1, 1, 1, 1, 1, 1, 0],
+                        [0, 0, 1, 0, 0, 0, 0],
+                        [0, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 0, 1, 1, 0, 1],
+                        [0, 1, 1, 1, 1, 0, 0],
+                        [0, 0, 1, 0, 1, 0, 0],
+                        [0, 1, 1, 1, 1, 0, 0]
+                    ]
+                },
+                {
+                    title: "고양이",
+                    hint: "뾰족한 두 귀를 쫑긋거리며 윙크하는 동물이에요.",
+                    grid: [
+                        [1, 1, 0, 0, 0, 1, 1],
+                        [1, 1, 1, 0, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [1, 0, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 0, 1, 1, 1],
+                        [0, 1, 1, 1, 1, 1, 0],
+                        [0, 0, 1, 1, 1, 0, 0]
+                    ]
+                },
+                {
+                    title: "선인장",
+                    hint: "화분 속에 뾰족한 가시를 뽐내는 사막의 식물이에요.",
+                    grid: [
+                        [0, 0, 0, 1, 1, 0, 0],
+                        [1, 1, 0, 1, 1, 0, 0],
+                        [1, 1, 0, 1, 1, 1, 1],
+                        [0, 1, 1, 1, 1, 0, 1],
+                        [0, 0, 0, 1, 1, 0, 0],
+                        [0, 1, 1, 1, 1, 1, 0],
+                        [0, 0, 1, 1, 1, 0, 0]
+                    ]
+                },
+                {
+                    title: "피아노",
+                    hint: "흑백의 건반을 두드려 고운 소리를 연주해요.",
+                    grid: [
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 0],
+                        [1, 0, 1, 0, 1, 1, 0],
+                        [1, 1, 1, 1, 1, 1, 0],
+                        [1, 0, 0, 0, 0, 1, 0],
+                        [1, 0, 0, 0, 0, 1, 0],
+                        [1, 1, 0, 1, 0, 1, 1]
+                    ]
+                },
+                {
+                    title: "왕관",
+                    hint: "임금님이나 여왕님이 머리에 쓰는 황금 장식이에요.",
+                    grid: [
+                        [1, 0, 0, 1, 0, 0, 0],
+                        [1, 1, 0, 1, 0, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [0, 1, 1, 1, 1, 1, 0],
+                        [0, 1, 0, 1, 0, 1, 0],
+                        [1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1]
+                    ]
+                }
             ]
         };
 
         function initGame() {
-            const selectVal = document.getElementById('stageSelect').value.split('_');
-            size = parseInt(selectVal[0]);
-            const puzzleIdx = parseInt(selectVal[1]);
+            const parts = document.getElementById('stageSelect').value.split('_');
+            size = parseInt(parts[0]);
+            const puzzleIdx = parseInt(parts[1]);
 
+            const selectedPuzzle = puzzleDatabase[size][puzzleIdx];
+            solution = selectedPuzzle.grid;
+            currentTitle = selectedPuzzle.title;
+            
+            // 수수께끼 힌트만 노출
+            document.getElementById('hintText').innerText = `"${selectedPuzzle.hint}"`;
             document.getElementById('message').innerText = '';
-            solution = puzzles[size][puzzleIdx];
+
             playerBoard = Array(size).fill(0).map(() => Array(size).fill(0));
             renderBoard();
         }
@@ -322,14 +513,14 @@
 
             let html = '<table class="nonogram-table">';
             
-            // 상단 열 힌트 행
+            // 열 힌트 행
             html += '<tr><td class="hint-cell"></td>';
             for (let c = 0; c < size; c++) {
                 html += `<td class="hint-cell">${colHints[c].split(' ').join('<br>')}</td>`;
             }
             html += '</tr>';
 
-            // 본문 칸 행
+            // 퍼즐 보드 행
             for (let r = 0; r < size; r++) {
                 html += '<tr>';
                 html += `<td class="hint-cell" style="padding: 0 4px;">${rowHints[r]}</td>`;
@@ -344,18 +535,14 @@
 
             html += '</table>';
             container.innerHTML = html;
-
-            // 우클릭 기본 메뉴 차단
             container.oncontextmenu = (e) => e.preventDefault();
         }
 
-        // 마우스 누름 시 드래그 시작 및 첫 칸 처리
         function startDrag(r, c, event) {
             if (event.button !== 0 && event.button !== 2) return;
             event.preventDefault();
 
             isDragging = true;
-            // 좌클릭: 현재 모드 / 우클릭: 반대 모드
             let activeMode = currentMode;
             if (event.button === 2) {
                 activeMode = (currentMode === 'fill') ? 'mark' : 'fill';
@@ -371,13 +558,11 @@
             applyCell(r, c, dragTargetVal);
         }
 
-        // 드래그 중인 상태로 마우스가 칸에 진입할 때
         function dragOver(r, c) {
             if (!isDragging) return;
             applyCell(r, c, dragTargetVal);
         }
 
-        // 칸 값 변경 및 UI 반영
         function applyCell(r, c, val) {
             playerBoard[r][c] = val;
             const cell = document.getElementById(`cell-${r}-${c}`);
@@ -388,7 +573,6 @@
             if (val === -1) cell.classList.add('marked');
         }
 
-        // 드래그 종료 (브라우저 어디서 마우스를 떼든 중단)
         window.addEventListener('mouseup', () => {
             isDragging = false;
         });
@@ -409,10 +593,11 @@
 
             if (isCorrect) {
                 msg.style.color = '#27ae60';
-                msg.innerText = '🎉 축하합니다! 완벽하게 풀어내셨습니다!';
+                // 완성 시에만 정답 이름을 공개
+                msg.innerText = `🎉 정답입니다! 완성된 그림은 [${currentTitle}]입니다!`;
             } else {
                 msg.style.color = '#c0392b';
-                msg.innerText = '❌ 완성되지 않았거나 틀린 부분이 있습니다. 다시 확인해 보세요!';
+                msg.innerText = '❌ 아직 완성되지 않았거나 틀린 부분이 있습니다. 다시 확인해 보세요!';
             }
         }
 
