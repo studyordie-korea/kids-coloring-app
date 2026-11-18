@@ -32,14 +32,14 @@
         .controls {
             margin-bottom: 10px;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
         }
         select, button {
-            padding: 8px 14px;
-            font-size: 0.95rem;
+            padding: 8px 12px;
+            font-size: 0.92rem;
             border-radius: 6px;
             border: 1px solid #bdc3c7;
             background-color: #fff;
@@ -53,6 +53,15 @@
         }
         button:active {
             background-color: #2980b9;
+        }
+        button.nav-btn {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: 1px solid #bdc3c7;
+            padding: 8px 10px;
+        }
+        button.nav-btn:active {
+            background-color: #d0d7de;
         }
         .game-layout {
             display: flex;
@@ -92,8 +101,12 @@
             margin: 0 auto;
             touch-action: none;
         }
+        /* 기본 셀 크기 (새로운 사이즈가 추가되어도 자동 대응) */
         .nonogram-table td {
             border: 1px solid #bdc3c7;
+            width: 24px;
+            height: 24px;
+            font-size: 0.7rem;
             text-align: center;
             vertical-align: middle;
             font-weight: bold;
@@ -111,10 +124,16 @@
             height: 30px;
             font-size: 0.78rem;
         }
-        .nonogram-table.size-10 td {
+        .nonogram-table.size-10 td,
+        .nonogram-table.size-11 td {
             width: 25px;
             height: 25px;
             font-size: 0.72rem;
+        }
+        .nonogram-table.size-15 td {
+            width: 21px;
+            height: 21px;
+            font-size: 0.65rem;
         }
         .nonogram-table.size-21 td {
             width: 17px;
@@ -139,9 +158,15 @@
             padding: 0 6px !important;
             text-align: right !important;
         }
-        .nonogram-table.size-10 .col-hint-cell {
+        .nonogram-table.size-10 .col-hint-cell,
+        .nonogram-table.size-11 .col-hint-cell {
             font-size: 0.7rem;
             line-height: 1.1;
+            padding: 1px 2px;
+        }
+        .nonogram-table.size-15 .col-hint-cell {
+            font-size: 0.65rem;
+            line-height: 1.08;
             padding: 1px 2px;
         }
         .nonogram-table.size-21 .col-hint-cell {
@@ -172,6 +197,26 @@
             z-index: 5;
         }
 
+        /* 돋보기 모드 십자선 및 힌트 하이라이트 */
+        .hint-cell.inspect-hint {
+            background-color: #fdebd0 !important;
+            color: #b9770e !important;
+            box-shadow: inset 0 0 0 1.5px #f39c12;
+        }
+        .play-cell.inspect-crosshair {
+            background-color: #fef9e7;
+        }
+        .play-cell.filled.inspect-crosshair {
+            background-color: #2c3e50 !important;
+            box-shadow: inset 0 0 0 1.5px #f39c12;
+        }
+        .play-cell.inspect-target {
+            outline: 2px solid #e67e22;
+            outline-offset: -2px;
+            z-index: 4;
+            position: relative;
+        }
+
         .play-cell {
             background-color: #ffffff;
             cursor: pointer;
@@ -188,18 +233,24 @@
             color: #e74c3c;
             font-size: 1rem;
         }
-        .nonogram-table.size-10 .play-cell.marked::after {
+        .nonogram-table.size-10 .play-cell.marked::after,
+        .nonogram-table.size-11 .play-cell.marked::after {
             font-size: 0.88rem;
+        }
+        .nonogram-table.size-15 .play-cell.marked::after {
+            font-size: 0.8rem;
         }
         .nonogram-table.size-21 .play-cell.marked::after {
             font-size: 0.75rem;
         }
         .mode-selector {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .mode-btn {
-            padding: 6px 14px;
+            padding: 6px 12px;
             font-size: 0.9rem;
             border-radius: 4px;
             border: 1px solid #bdc3c7;
@@ -212,6 +263,56 @@
             color: white;
             border-color: #2c3e50;
         }
+        .mode-btn.magnify-btn.active {
+            background: #d35400;
+            border-color: #d35400;
+            color: white;
+        }
+
+        /* 돋보기 결과 패널 */
+        .magnify-panel {
+            display: none;
+            width: 100%;
+            max-width: 440px;
+            background-color: #fdf2e9;
+            border: 1.5px solid #f5cba7;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            color: #7e5109;
+            font-size: 0.86rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+        .magnify-panel.visible {
+            display: block;
+        }
+        .magnify-panel .mag-title {
+            font-weight: bold;
+            color: #ba4a00;
+            margin-bottom: 2px;
+        }
+        .magnify-panel .mag-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .magnify-panel .mag-badge {
+            background: #ffffff;
+            border: 1px solid #f0b27a;
+            border-radius: 5px;
+            padding: 2px 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .magnify-panel .mag-blocks {
+            color: #7f8c8d;
+            font-weight: normal;
+            font-size: 0.8rem;
+            margin-left: 3px;
+        }
+
         .tip-text {
             font-size: 0.8rem;
             color: #95a5a6;
@@ -252,91 +353,10 @@
     <p class="subtitle">심오한 수수께끼를 풀며 숨겨진 그림을 완성해 보세요!</p>
 
     <div class="controls">
-        <select id="stageSelect" onchange="initGame()">
-            <optgroup label="⭐ 10 x 10 퍼즐 (정예 10제)">
-                <option value="10_0" selected>10x10 - 퍼즐 01</option>
-                <option value="10_1">10x10 - 퍼즐 02</option>
-                <option value="10_2">10x10 - 퍼즐 03</option>
-                <option value="10_3">10x10 - 퍼즐 04</option>
-                <option value="10_4">10x10 - 퍼즐 05</option>
-                <option value="10_5">10x10 - 퍼즐 06</option>
-                <option value="10_6">10x10 - 퍼즐 07</option>
-                <option value="10_7">10x10 - 퍼즐 08</option>
-                <option value="10_8">10x10 - 퍼즐 09</option>
-                <option value="10_9">10x10 - 퍼즐 10</option>
-            </optgroup>
-            <optgroup label="👑 21 x 21 퍼즐 (마스터 25제)">
-    <option value="21_0" selected>21x21 - 퍼즐 01</option>
-    <option value="21_1">21x21 - 퍼즐 02</option>
-    <option value="21_2">21x21 - 퍼즐 03</option>
-    <option value="21_3">21x21 - 퍼즐 04</option>
-    <option value="21_4">21x21 - 퍼즐 05</option>
-    <option value="21_5">21x21 - 퍼즐 06</option>
-    <option value="21_6">21x21 - 퍼즐 07</option>
-    <option value="21_7">21x21 - 퍼즐 08</option>
-    <option value="21_8">21x21 - 퍼즐 09</option>
-    <option value="21_9">21x21 - 퍼즐 10</option>
-    <option value="21_10">21x21 - 퍼즐 11</option>
-    <option value="21_11">21x21 - 퍼즐 12</option>
-    <option value="21_12">21x21 - 퍼즐 13</option>
-    <option value="21_13">21x21 - 퍼즐 14</option>
-    <option value="21_14">21x21 - 퍼즐 15</option>
-    <option value="21_15">21x21 - 퍼즐 16 (신규)</option>
-    <option value="21_16">21x21 - 퍼즐 17 (신규)</option>
-    <option value="21_17">21x21 - 퍼즐 18 (신규)</option>
-    <option value="21_18">21x21 - 퍼즐 19 (신규)</option>
-    <option value="21_19">21x21 - 퍼즐 20 (신규)</option>
-    <option value="21_20">21x21 - 퍼즐 21 (신규)</option>
-    <option value="21_21">21x21 - 퍼즐 22 (신규)</option>
-    <option value="21_22">21x21 - 퍼즐 23 (신규)</option>
-    <option value="21_23">21x21 - 퍼즐 24 (신규)</option>
-    <option value="21_24">21x21 - 퍼즐 25 (신규)</option>
-</optgroup>
-            <optgroup label="🌿 7 x 7 퍼즐 (도전 20제)">
-                <option value="7_0">7x7 - 퍼즐 01</option>
-                <option value="7_1">7x7 - 퍼즐 02</option>
-                <option value="7_2">7x7 - 퍼즐 03</option>
-                <option value="7_3">7x7 - 퍼즐 04</option>
-                <option value="7_4">7x7 - 퍼즐 05</option>
-                <option value="7_5">7x7 - 퍼즐 06</option>
-                <option value="7_6">7x7 - 퍼즐 07</option>
-                <option value="7_7">7x7 - 퍼즐 08</option>
-                <option value="7_8">7x7 - 퍼즐 09</option>
-                <option value="7_9">7x7 - 퍼즐 10</option>
-                <option value="7_10">7x7 - 퍼즐 11</option>
-                <option value="7_11">7x7 - 퍼즐 12</option>
-                <option value="7_12">7x7 - 퍼즐 13</option>
-                <option value="7_13">7x7 - 퍼즐 14</option>
-                <option value="7_14">7x7 - 퍼즐 15</option>
-                <option value="7_15">7x7 - 퍼즐 16</option>
-                <option value="7_16">7x7 - 퍼즐 17</option>
-                <option value="7_17">7x7 - 퍼즐 18</option>
-                <option value="7_18">7x7 - 퍼즐 19</option>
-                <option value="7_19">7x7 - 퍼즐 20</option>
-            </optgroup>
-            <optgroup label="🌱 5 x 5 퍼즐 (입문 20제)">
-                <option value="5_0">5x5 - 퍼즐 01</option>
-                <option value="5_1">5x5 - 퍼즐 02</option>
-                <option value="5_2">5x5 - 퍼즐 03</option>
-                <option value="5_3">5x5 - 퍼즐 04</option>
-                <option value="5_4">5x5 - 퍼즐 05</option>
-                <option value="5_5">5x5 - 퍼즐 06</option>
-                <option value="5_6">5x5 - 퍼즐 07</option>
-                <option value="5_7">5x5 - 퍼즐 08</option>
-                <option value="5_8">5x5 - 퍼즐 09</option>
-                <option value="5_9">5x5 - 퍼즐 10</option>
-                <option value="5_10">5x5 - 퍼즐 11</option>
-                <option value="5_11">5x5 - 퍼즐 12</option>
-                <option value="5_12">5x5 - 퍼즐 13</option>
-                <option value="5_13">5x5 - 퍼즐 14</option>
-                <option value="5_14">5x5 - 퍼즐 15</option>
-                <option value="5_15">5x5 - 퍼즐 16</option>
-                <option value="5_16">5x5 - 퍼즐 17</option>
-                <option value="5_17">5x5 - 퍼즐 18</option>
-                <option value="5_18">5x5 - 퍼즐 19</option>
-                <option value="5_19">5x5 - 퍼즐 20</option>
-            </optgroup>
-        </select>
+        <button class="nav-btn" onclick="navigatePuzzle(-1)" title="이전 퍼즐">◀</button>
+        <!-- puzzles.js 데이터를 읽어 자동으로 옵션이 채워집니다 -->
+        <select id="stageSelect" onchange="initGame()"></select>
+        <button class="nav-btn" onclick="navigatePuzzle(1)" title="다음 퍼즐">▶</button>
         <button onclick="initGame()">다시 시작</button>
         <button onclick="checkAnswer()" style="background-color: #2ecc71;">정답 확인</button>
     </div>
@@ -349,8 +369,19 @@
         <div class="mode-selector">
             <button class="mode-btn active" id="modeFill" onclick="setMode('fill')">✏️ 채우기 (■)</button>
             <button class="mode-btn" id="modeMark" onclick="setMode('mark')">❌ X표시 (X)</button>
+            <button class="mode-btn magnify-btn" id="modeMagnify" onclick="setMode('magnify')">🔍 돋보기</button>
         </div>
-        <div class="tip-text">마우스/손가락 드래그 시 2칸 이상부터 개수 카운터 표시</div>
+
+        <!-- 돋보기 측정 결과 표시 패널 -->
+        <div class="magnify-panel" id="magnifyPanel">
+            <div class="mag-title" id="magTitle">🔍 칸을 터치하거나 드래그하여 색칠된 개수를 확인하세요</div>
+            <div class="mag-row" id="magDetail" style="display: none;">
+                <span class="mag-badge" id="magRowInfo">가로: 0칸</span>
+                <span class="mag-badge" id="magColInfo">세로: 0칸</span>
+            </div>
+        </div>
+
+        <div class="tip-text" id="tipText">마우스/손가락 드래그 시 2칸 이상부터 개수 카운터 표시</div>
         <div id="board-container"></div>
     </div>
 
@@ -367,6 +398,7 @@
         let currentTitle = '';
         
         let isDragging = false;
+        let isInspecting = false;
         let startR = -1;
         let startC = -1;
         let dragTargetVal = 0;
@@ -374,14 +406,92 @@
         let activeLineCells = [];
         let touchEventsInitialized = false;
 
+        // puzzles.js의 puzzleDatabase를 읽어 드롭다운 목록을 자동 생성하는 함수
+        function buildStageSelect() {
+            const select = document.getElementById('stageSelect');
+            if (typeof puzzleDatabase === 'undefined') {
+                document.getElementById('hintText').innerText = 'puzzles.js 파일을 찾을 수 없습니다. 같은 폴더에 있는지 확인해 주세요.';
+                return;
+            }
+
+            // 사이즈별 아이콘 및 타이틀 프리셋 (없는 사이즈가 추가되어도 기본값으로 자동 생성됨)
+            const presetMeta = {
+                5:  { icon: '🌱', desc: '입문' },
+                7:  { icon: '🌿', desc: '도전' },
+                10: { icon: '⭐', desc: '정예' },
+                11: { icon: '🔥', desc: '숙련' },
+                15: { icon: '💎', desc: '고수' },
+                21: { icon: '👑', desc: '마스터' }
+            };
+
+            // 선호하는 노출 순서 (21 -> 10 -> 7 -> 5 순으로 먼저 배치하고, 새로운 크기가 있으면 뒤에 자동 추가)
+            const preferredOrder = [21, 10, 7, 5];
+            const availableSizes = Object.keys(puzzleDatabase)
+                .map(Number)
+                .filter(sz => Array.isArray(puzzleDatabase[sz]) && puzzleDatabase[sz].length > 0);
+
+            const sortedSizes = [
+                ...preferredOrder.filter(sz => availableSizes.includes(sz)),
+                ...availableSizes.filter(sz => !preferredOrder.includes(sz)).sort((a, b) => b - a)
+            ];
+
+            let html = '';
+            sortedSizes.forEach(sz => {
+                const list = puzzleDatabase[sz];
+                const meta = presetMeta[sz] || { icon: '🧩', desc: '확장' };
+                const groupLabel = `${meta.icon} ${sz} x ${sz} 퍼즐 (${meta.desc} ${list.length}제)`;
+
+                html += `<optgroup label="${groupLabel}">`;
+                list.forEach((_, idx) => {
+                    const numStr = String(idx + 1).padStart(2, '0');
+                    html += `<option value="${sz}_${idx}">${sz}x${sz} - 퍼즐 ${numStr}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+
+            select.innerHTML = html;
+        }
+
+        // 이전/다음 퍼즐 버튼 이동 함수
+        function navigatePuzzle(direction) {
+            const select = document.getElementById('stageSelect');
+            if (!select || select.options.length === 0) return;
+
+            let nextIndex = select.selectedIndex + direction;
+            if (nextIndex < 0) nextIndex = select.options.length - 1;
+            if (nextIndex >= select.options.length) nextIndex = 0;
+
+            select.selectedIndex = nextIndex;
+            initGame();
+        }
+
         function clearBlinkErrors() {
             document.querySelectorAll('.hint-cell').forEach(cell => {
                 cell.classList.remove('blink-error');
             });
         }
 
+        function clearInspectHighlights() {
+            document.querySelectorAll('.play-cell').forEach(cell => {
+                cell.classList.remove('inspect-crosshair', 'inspect-target');
+            });
+            document.querySelectorAll('.hint-cell').forEach(cell => {
+                cell.classList.remove('inspect-hint');
+            });
+        }
+
+        function resetMagnifyPanel() {
+            const titleEl = document.getElementById('magTitle');
+            const detailEl = document.getElementById('magDetail');
+            if (titleEl) titleEl.innerText = '🔍 칸을 터치하거나 드래그하여 색칠된 개수를 확인하세요';
+            if (detailEl) detailEl.style.display = 'none';
+        }
+
         function initGame() {
-            const parts = document.getElementById('stageSelect').value.split('_');
+            const select = document.getElementById('stageSelect');
+            if (!select || !select.value) return;
+
+            const parts = select.value.split('_');
             size = parseInt(parts[0]);
             const puzzleIdx = parseInt(parts[1]);
 
@@ -393,6 +503,7 @@
             document.getElementById('message').innerText = '';
 
             isDragging = false;
+            isInspecting = false;
             startR = -1;
             startC = -1;
             activeLineCells = [];
@@ -401,6 +512,9 @@
             if (counter) counter.style.display = 'none';
 
             clearBlinkErrors();
+            clearInspectHighlights();
+            resetMagnifyPanel();
+
             playerBoard = Array(size).fill(0).map(() => Array(size).fill(0));
             renderBoard();
         }
@@ -409,6 +523,20 @@
             currentMode = mode;
             document.getElementById('modeFill').classList.toggle('active', mode === 'fill');
             document.getElementById('modeMark').classList.toggle('active', mode === 'mark');
+            document.getElementById('modeMagnify').classList.toggle('active', mode === 'magnify');
+
+            const magPanel = document.getElementById('magnifyPanel');
+            const tipText = document.getElementById('tipText');
+
+            if (mode === 'magnify') {
+                magPanel.classList.add('visible');
+                tipText.style.display = 'none';
+            } else {
+                magPanel.classList.remove('visible');
+                tipText.style.display = 'block';
+                clearInspectHighlights();
+                resetMagnifyPanel();
+            }
         }
 
         function getHints(line) {
@@ -426,6 +554,62 @@
             return hints.length > 0 ? hints.join(' ') : '0';
         }
 
+        // 플레이어가 현재 칠한 줄의 총 칸 수 및 연속 블록 계산
+        function analyzeLineFilled(line) {
+            let total = 0;
+            let blocks = [];
+            let count = 0;
+            for (let val of line) {
+                if (val === 1) {
+                    total++;
+                    count++;
+                } else if (count > 0) {
+                    blocks.push(count);
+                    count = 0;
+                }
+            }
+            if (count > 0) blocks.push(count);
+            return { total, blocks };
+        }
+
+        // 돋보기 모드: 선택한 칸의 가로·세로 색칠 현황 표시
+        function inspectCell(r, c) {
+            clearInspectHighlights();
+
+            for (let col = 0; col < size; col++) {
+                const cellEl = document.getElementById(`cell-${r}-${col}`);
+                if (cellEl) cellEl.classList.add('inspect-crosshair');
+            }
+            for (let row = 0; row < size; row++) {
+                const cellEl = document.getElementById(`cell-${row}-${c}`);
+                if (cellEl) cellEl.classList.add('inspect-crosshair');
+            }
+
+            const targetEl = document.getElementById(`cell-${r}-${c}`);
+            if (targetEl) targetEl.classList.add('inspect-target');
+
+            const rowHintEl = document.getElementById(`row-hint-${r}`);
+            if (rowHintEl) rowHintEl.classList.add('inspect-hint');
+
+            const colHintEl = document.getElementById(`col-hint-${c}`);
+            if (colHintEl) colHintEl.classList.add('inspect-hint');
+
+            const rowStats = analyzeLineFilled(playerBoard[r]);
+            let colArr = [];
+            for (let row = 0; row < size; row++) {
+                colArr.push(playerBoard[row][c]);
+            }
+            const colStats = analyzeLineFilled(colArr);
+
+            const rowBlocksText = rowStats.blocks.length > 0 ? `(${rowStats.blocks.join(' · ')})` : '';
+            const colBlocksText = colStats.blocks.length > 0 ? `(${colStats.blocks.join(' · ')})` : '';
+
+            document.getElementById('magTitle').innerText = `🔍 ${r + 1}행 · ${c + 1}열 기준 색칠된 칸 수`;
+            document.getElementById('magRowInfo').innerHTML = `가로(${r + 1}행): ${rowStats.total}칸 <span class="mag-blocks">${rowBlocksText}</span>`;
+            document.getElementById('magColInfo').innerHTML = `세로(${c + 1}열): ${colStats.total}칸 <span class="mag-blocks">${colBlocksText}</span>`;
+            document.getElementById('magDetail').style.display = 'flex';
+        }
+
         function renderBoard() {
             const container = document.getElementById('board-container');
             
@@ -441,14 +625,12 @@
 
             let html = `<table class="nonogram-table size-${size}">`;
             
-            // 상단 열 힌트
             html += '<tr><td class="hint-cell"></td>';
             for (let c = 0; c < size; c++) {
                 html += `<td class="hint-cell col-hint-cell" id="col-hint-${c}">${colHints[c].split(' ').join('<br>')}</td>`;
             }
             html += '</tr>';
 
-            // 좌측 가로 힌트 & 본문 셀
             for (let r = 0; r < size; r++) {
                 html += '<tr>';
                 html += `<td class="hint-cell row-hint-cell" id="row-hint-${r}">${rowHints[r]}</td>`;
@@ -468,6 +650,12 @@
         function handleMouseDown(r, c, event) {
             if (event.button !== 0 && event.button !== 2) return;
             event.preventDefault();
+
+            if (currentMode === 'magnify') {
+                isInspecting = true;
+                inspectCell(r, c);
+                return;
+            }
 
             let isRightClick = (event.button === 2);
             startDrag(r, c, event.clientX, event.clientY, isRightClick);
@@ -555,6 +743,15 @@
         }
 
         window.addEventListener('mousemove', (e) => {
+            if (isInspecting && currentMode === 'magnify') {
+                const target = document.elementFromPoint(e.clientX, e.clientY);
+                if (target && target.classList.contains('play-cell')) {
+                    const parts = target.id.split('-');
+                    inspectCell(parseInt(parts[1]), parseInt(parts[2]));
+                }
+                return;
+            }
+
             if (!isDragging) return;
             const counter = document.getElementById('drag-counter');
             if (counter && counter.style.display === 'block') {
@@ -570,6 +767,9 @@
         });
 
         window.addEventListener('mouseup', () => {
+            if (isInspecting) {
+                isInspecting = false;
+            }
             if (isDragging) {
                 isDragging = false;
                 const counter = document.getElementById('drag-counter');
@@ -590,14 +790,35 @@
                 if (target && target.classList.contains('play-cell')) {
                     e.preventDefault();
                     const parts = target.id.split('-');
-                    startDrag(parseInt(parts[1]), parseInt(parts[2]), touch.clientX, touch.clientY, false);
+                    const r = parseInt(parts[1]);
+                    const c = parseInt(parts[2]);
+
+                    if (currentMode === 'magnify') {
+                        isInspecting = true;
+                        inspectCell(r, c);
+                        return;
+                    }
+
+                    startDrag(r, c, touch.clientX, touch.clientY, false);
                 }
             }, { passive: false });
 
             container.addEventListener('touchmove', (e) => {
-                if (!isDragging || e.touches.length > 1) return;
-                e.preventDefault();
+                if (e.touches.length > 1) return;
                 const touch = e.touches[0];
+
+                if (isInspecting && currentMode === 'magnify') {
+                    e.preventDefault();
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (target && target.classList.contains('play-cell')) {
+                        const parts = target.id.split('-');
+                        inspectCell(parseInt(parts[1]), parseInt(parts[2]));
+                    }
+                    return;
+                }
+
+                if (!isDragging) return;
+                e.preventDefault();
                 
                 const target = document.elementFromPoint(touch.clientX, touch.clientY);
                 if (target && target.classList.contains('play-cell')) {
@@ -613,6 +834,9 @@
             }, { passive: false });
 
             const endTouch = () => {
+                if (isInspecting) {
+                    isInspecting = false;
+                }
                 if (isDragging) {
                     isDragging = false;
                     const counter = document.getElementById('drag-counter');
@@ -670,6 +894,7 @@
         }
 
         window.onload = () => {
+            buildStageSelect();
             initGame();
             initTouchEventsOnce();
         };
